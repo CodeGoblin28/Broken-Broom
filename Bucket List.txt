@@ -1,0 +1,8 @@
+1. Make Start Menu
+2. Add incoming fast enemies
+3. Add sprites
+4. Fix UI
+5. Add level selector (20Levels for now)
+6. Add Ground
+7. Add More enemies
+8. Make Storyboard
