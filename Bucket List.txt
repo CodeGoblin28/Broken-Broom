@@ -6,3 +6,17 @@
 6. Add Ground
 7. Add More enemies
 8. Make Storyboard
+
+
+
+1-5 Level - Broken Broom
+Jumps
+
+6-10 Level - Duct Tape
+Spam Flight
+
+11-15 Level - Magic Tape
+Hold Flight
+
+16-20 Level - Witch's Broom Fixer
+Up-and-Down Flight

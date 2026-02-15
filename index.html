@@ -1,16 +1,87 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Endless Runner</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="script.js"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Scrolling Background</title>
+
+<style>
+    body {
+        margin: 0;
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+
+        background-image: url("asset/origbig.png");
+        background-repeat: repeat-x;
+        background-size: auto 100%;
+        background-position: 0 0;
+
+        position: relative;
+    }
+
+    /* Dark overlay */
+    body::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 1;
+    }
+
+    .title {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 2;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .start-btn {
+        margin-top: 20px;
+        padding: 12px 40px;
+
+        font-family: 'Courier New', monospace;
+        font-size: 24px;
+        color: white;
+        text-decoration: none;
+        letter-spacing: 2px;
+
+        border: 3px solid white;
+        background: transparent;
+
+        transition: all 0.2s ease;
+    }
+
+    .start-btn:hover {
+        background: white;
+        color: black;
+        transform: scale(1.05);
+    }
+</style>
 </head>
+
 <body>
-    <div class="game-container">
-        <div class="game-title">Broken Broom</div>
-        <canvas id="board"></canvas>
+    <div class="title">
+        <img src="asset/Title.png" alt="">
+        <a href="game.html" class="start-btn">START</a>
     </div>
+
+<script>
+    let bgX = 0;
+    const speed = 0.3; // pixels per frame
+
+    function scrollBackground() {
+        bgX -= speed;
+        document.body.style.backgroundPositionX = `${bgX}px`;
+
+        requestAnimationFrame(scrollBackground);
+    }
+
+    scrollBackground();
+</script>
 </body>
 </html>

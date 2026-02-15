@@ -1,0 +1,16 @@
+html, body {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+#canvas1{
+    display: block;
+    width: 100vw;
+    height: 100vh;
+    background-color: green;
+}
+
+#player, #layer1, #layer2, #layer3, #layer4, #enemy_fly, #enemy_plant, #enemy_spider_big {
+    display: none;
+}
