@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Select World</title>
+
+<style>
+    body {
+        margin: 0;
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+
+        background-image: url("asset/origbig.png");
+        background-repeat: repeat-x;
+        background-size: auto 100%;
+        background-position: 0 0;
+
+        position: relative;
+    }
+
+    /* Dark overlay */
+    body::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.6);
+        z-index: 1;
+    }
+
+    .worlds {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 60px;
+        z-index: 2; /* Above overlay */
+    }
+
+    .world {
+        cursor: pointer;
+        transition: transform 0.2s ease;
+    }
+
+    .world img {
+        width: 200px;
+    }
+
+    .world:hover {
+        transform: scale(1.1);
+    }
+</style>
+</head>
+
+<body>
+
+<div class="worlds">
+    <div class="world" data-world="forest">
+        <img src="asset/worlds/forest.png" alt="Forest">
+    </div>
+
+    <div class="world" data-world="cave">
+        <img src="asset/worlds/Cave.png" alt="Cave">
+    </div>
+
+    <div class="world" data-world="volcano">
+        <img src="asset/worlds/Volcano.png" alt="Volcano">
+    </div>
+
+    <div class="world" data-world="sky">
+        <img src="asset/worlds/Sky.png" alt="Sky">
+    </div>
+</div>
+
+<script>
+    // Moving background (same as index)
+    let bgX = 0;
+    const speed = 0.3;
+
+    function scrollBackground() {
+        bgX -= speed;
+        document.body.style.backgroundPositionX = `${bgX}px`;
+        requestAnimationFrame(scrollBackground);
+    }
+    scrollBackground();
+
+    // World selection
+    const worlds = document.querySelectorAll('.world');
+
+    worlds.forEach(world => {
+        world.addEventListener('click', () => {
+            const selectedWorld = world.dataset.world;
+            window.location.href = `game.html?world=${selectedWorld}`;
+        });
+    });
+</script>
+
+</body>
+</html>

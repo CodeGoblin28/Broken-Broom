@@ -22,6 +22,7 @@ class Enemy {
         if (this.x + this.width < 0) this.markForDeletion = true;
     }
     draw(context){
+        if (this.game.debug) context.strokeRect(this.x, this.y, this.width, this.height);
         context.drawImage(this.image, this.frameX * this.width, 0, this.width, this.height, this.x, this.y, this.width, this.height);
     }
 }
@@ -30,10 +31,17 @@ export class FlyingEnemy extends Enemy {
     constructor(game){
         super();
         this.game = game;
-        this.width = 60;
-        this.height = 44;
         this.x = this.game.width + Math.random() * this.game.width * 0.5;
         this.y = Math.random() * this.game.height * 0.5;
+        this.speedX = Math.random() + 1;
+    }
+}
+
+export class Fly extends FlyingEnemy {
+    constructor(game){
+        super(game);
+        this.width = 60;
+        this.height = 44;
         this.speedX = Math.random() + 1;
         this.speedY = 0;
         this.maxFrame = 5;
@@ -48,6 +56,21 @@ export class FlyingEnemy extends Enemy {
     }
 }
 
+export class FireSpirit extends FlyingEnemy {
+    constructor(game){
+        super(game);
+        this.width = 100;
+        this.height = 92;
+        this.speedX = 4;
+        this.speedY = 0;
+        this.maxFrame = 7;
+        this.image = document.getElementById('fire_spirit');
+    }    
+}
+
+
+
+
 export class GroundEnemy extends Enemy {
     constructor(game){
         super();
@@ -60,7 +83,6 @@ export class GroundEnemy extends Enemy {
         this.speedX = 1.6;
         this.speedY = 0;    
         this.maxFrame = 1;
-
     }
 }
 

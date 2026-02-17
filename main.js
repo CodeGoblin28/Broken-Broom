@@ -1,7 +1,8 @@
 import { Player } from "./player.js";
 import { InputHandler } from "./input.js";
-import { Background } from "./background.js";
-import { FlyingEnemy, ClimbingEnemy, GroundEnemy } from "./enemies.js";
+import { BackgroundForest, BackgroundCave, BackgroundVolcano } from "./background.js";
+import { Fly, FireSpirit, ClimbingEnemy, GroundEnemy } from "./enemies.js";
+import { Coin } from "./coins.js";
 
 window.addEventListener('load', function(){
     const canvas = document.getElementById('canvas1');
@@ -9,21 +10,67 @@ window.addEventListener('load', function(){
     canvas.height = window.innerHeight;
     canvas.width = window.innerWidth;
 
+    // Get selected world from URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const selectedWorld = urlParams.get("world");
+
     class Game {
-        constructor(width, height){
+        constructor(width, height, world){
             this.width = width;
             this.height = height;
             this.groundMargin = 50;
             this.speed = 2;
-            this.background = new Background(this);
+
+            // Choose background based on world
+            if (world === "cave") {
+                this.background = new BackgroundCave(this);
+            } else if(world === "volcano") {
+                // Default = forest
+                this.background = new BackgroundVolcano(this);
+            } else {
+                // Default = forest
+                this.background = new BackgroundForest(this);
+            }
+
+            // Coin
+            this.coins = [];
+            this.coinTimer = 0;
+            this.coinInterval = 3000; // spawn every 3 seconds
+
+            // Load saved coins
+            this.coinCount = parseInt(localStorage.getItem("coins")) || 0;
+
             this.player = new Player(this);
-            this.input = new InputHandler();
+            this.input = new InputHandler(this);
 
             this.enemies = [];
             this.enemyTimer = 0;
             this.enemyInterval = 2000;
+
+            this.debug = true;
         }
         update(deltaTime){
+            // If Escape is pressed → go back to index
+            if (this.input.keys.includes("Escape")) {
+                window.location.href = "index.html";
+            }
+
+            // Coin spawning
+            if(this.coinTimer > this.coinInterval){
+                this.coins.push(new Coin(this));
+                this.coinTimer = 0;
+            } else {
+                this.coinTimer += deltaTime;
+            }
+
+            this.coins.forEach(coin => {
+                coin.update(deltaTime);
+                if(coin.markForDeletion){
+                    this.coins.splice(this.coins.indexOf(coin), 1);
+                }
+            });
+
+
             this.background.update();
             this.player.update(this.input.keys, deltaTime);
 
@@ -45,15 +92,29 @@ window.addEventListener('load', function(){
             this.enemies.forEach(enemy => {
                 enemy.draw(context);
             })
+
+            this.coins.forEach(coin => {
+                coin.draw(context);
+            });
+
+            // Draw coin counter UI
+            context.fillStyle = "white";
+            context.font = "30px Arial";
+            context.fillText("Coins: " + this.coinCount, 20, 50);
         }
         addEnemy(){
             if (this.speed > 0 && Math.random() < 0.3) this.enemies.push(new GroundEnemy(this));
-            this.enemies.push(new FlyingEnemy(this));
+            this.enemies.push(new Fly(this));
+            this.enemies.push(new FireSpirit(this));
             console.log(this.enemies);
+        }
+        addCoin(){
+            this.coinCount++;
+            localStorage.setItem("coins", this.coinCount);
         }
     }
 
-    const game = new Game(canvas.width, canvas.height);
+    const game = new Game(canvas.width, canvas.height, selectedWorld);
     console.log(game);
 
     let lastTime = 0;

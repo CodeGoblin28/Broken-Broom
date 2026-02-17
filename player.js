@@ -68,6 +68,7 @@ export class Player{
         // context.fillStyle = 'red';
         // context.fillRect(this.x, this.y, this.width, this.height);
         // context.drawImage(this.image, 53, 48, this.width, this.height, this.x, this.y, this.width * 3, this.height * 3)
+        if (this.game.debug) context.strokeRect(this.x, this.y, this.width, this.height);
         context.drawImage(
             this.image,
             this.frameX * this.frameWidth + this.sprite.x,

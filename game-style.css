@@ -11,6 +11,18 @@ html, body {
     background-color: green;
 }
 
-#player, #layer1, #layer2, #layer3, #layer4, #enemy_fly, #enemy_plant, #enemy_spider_big {
+#player, #layer1, #layer2, #layer3, #layer4, #enemy_fly, #enemy_plant, #enemy_spider_big, #coin {
+    display: none;
+}
+
+#fire_spirit{
+    display: none;
+}
+
+#layerCave1, #layerCave2, #layerCave3, #layerCave4, #layerCave5, #layerCave6, #layerCave7{
+    display: none;
+}
+
+#layerVol1, #layerVol2, #layerVol3, #layerVol4, #layerVol5 {
     display: none;
 }
