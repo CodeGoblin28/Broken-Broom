@@ -106,3 +106,32 @@ export class BackgroundVolcano {
         })
     }
 }
+
+export class BackgroundSky {
+    constructor(game){
+        this.game = game;
+        this.width = 1552;
+        this.height = 900;
+        this.layer1Image = document.getElementById('layerSky1');
+        this.layer2Image = document.getElementById('layerSky2');
+        this.layer3Image = document.getElementById('layerSky3');
+        this.layer4Image = document.getElementById('layerSky4');
+        this.layer5Image = document.getElementById('layerSky5');
+        this.layer1 = new Layer(this.game, this.width, this.height, 0.1, this.layer1Image);
+        this.layer2 = new Layer(this.game, this.width, this.height, 0.2, this.layer2Image);
+        this.layer3 = new Layer(this.game, this.width, this.height, 0.3, this.layer3Image);
+        this.layer4 = new Layer(this.game, this.width, this.height, 0.4, this.layer4Image);
+        this.layer5 = new Layer(this.game, this.width, this.height, 0.8, this.layer5Image);
+        this.backgroundLayers = [this.layer1, this.layer2, this.layer3, this.layer4, this.layer5];
+    }
+    update(){
+        this.backgroundLayers.forEach(layer => {
+            layer.update();
+        })
+    }
+    draw(context){
+        this.backgroundLayers.forEach(layer => {
+            layer.draw(context);
+        })
+    }
+}

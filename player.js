@@ -9,8 +9,8 @@ export class Player{
 
         this.sprite = {
             x: 45,
-            y: 35,
-            width: 40,
+            y: 37,
+            width: 43,
             height: 45
         };
 
@@ -29,9 +29,14 @@ export class Player{
 
         this.image = document.getElementById('player');
         
+
+        this.maxFrame = 9;
         this.frameX = 0;
         this.frameY = 2;
 
+        this.fps = 10;
+        this.frameInterval = 1000 / this.fps;
+        this.frameTimer = 0;
     }
     update(input, deltaTime){
         const dt = deltaTime * 0.001; // convert ms → seconds
@@ -62,13 +67,32 @@ export class Player{
 
         }
 
+        // Simple Sprite Animation
+        if (this.speed !== 0) {
+            if (this.frameTimer > this.frameInterval) {
+                this.frameTimer = 0;
+
+                if (this.frameX < this.maxFrame) {
+                    this.frameX++;
+                } else {
+                    this.frameX = 0;
+                }
+            } else {
+                this.frameTimer += deltaTime;
+            }
+        } else {
+            this.frameX = 0; // idle frame
+        }
         
     }
     draw(context){
         // context.fillStyle = 'red';
         // context.fillRect(this.x, this.y, this.width, this.height);
         // context.drawImage(this.image, 53, 48, this.width, this.height, this.x, this.y, this.width * 3, this.height * 3)
-        if (this.game.debug) context.strokeRect(this.x, this.y, this.width, this.height);
+        if (this.game.debug) {
+            context.strokeStyle = "lime"; 
+            context.strokeRect(this.x, this.y, this.width, this.height);
+        }
         context.drawImage(
             this.image,
             this.frameX * this.frameWidth + this.sprite.x,

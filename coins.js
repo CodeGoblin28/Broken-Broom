@@ -7,7 +7,7 @@ export class Coin {
         this.x = this.game.width + Math.random() * 200;
         this.y = this.game.height - this.height - this.game.groundMargin - Math.random() * 150;
 
-        this.speedX = this.game.speed;
+        this.speedX = this.game.speed * .8;
         this.markForDeletion = false;
 
         this.image = document.getElementById('coin'); // Add this image in HTML

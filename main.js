@@ -1,6 +1,6 @@
 import { Player } from "./player.js";
 import { InputHandler } from "./input.js";
-import { BackgroundForest, BackgroundCave, BackgroundVolcano } from "./background.js";
+import { BackgroundForest, BackgroundCave, BackgroundVolcano, BackgroundSky } from "./background.js";
 import { Fly, FireSpirit, ClimbingEnemy, GroundEnemy } from "./enemies.js";
 import { Coin } from "./coins.js";
 
@@ -27,10 +27,16 @@ window.addEventListener('load', function(){
             } else if(world === "volcano") {
                 // Default = forest
                 this.background = new BackgroundVolcano(this);
+            } else if(world === "sky") {
+                // Default = forest
+                this.background = new BackgroundSky(this);
             } else {
                 // Default = forest
                 this.background = new BackgroundForest(this);
             }
+
+            this.world = world;
+            this.floorHeight = 50;
 
             // Coin
             this.coins = [];
@@ -47,7 +53,7 @@ window.addEventListener('load', function(){
             this.enemyTimer = 0;
             this.enemyInterval = 2000;
 
-            this.debug = true;
+            this.debug = false;
         }
         update(deltaTime){
             // If Escape is pressed → go back to index
@@ -89,6 +95,9 @@ window.addEventListener('load', function(){
         draw(context){
             this.background.draw(context);
             this.player.draw(context);
+
+            this.drawFloor(context);
+
             this.enemies.forEach(enemy => {
                 enemy.draw(context);
             })
@@ -102,15 +111,51 @@ window.addEventListener('load', function(){
             context.font = "30px Arial";
             context.fillText("Coins: " + this.coinCount, 20, 50);
         }
+
+
         addEnemy(){
             if (this.speed > 0 && Math.random() < 0.3) this.enemies.push(new GroundEnemy(this));
             this.enemies.push(new Fly(this));
-            this.enemies.push(new FireSpirit(this));
+
+            if(this.world === "volcano") {
+                this.enemies.push(new FireSpirit(this));
+            }
             console.log(this.enemies);
         }
+
+
         addCoin(){
             this.coinCount++;
             localStorage.setItem("coins", this.coinCount);
+        }
+
+        drawFloor(context){
+            if (this.world === "sky") return;
+
+            context.save();
+
+            // Choose floor color based on world
+            if (this.world === "forest") {
+                context.fillStyle = "#3a5f0b"; // dark green
+            } 
+            else if (this.world === "cave") {
+                context.fillStyle = "#2f2f2f"; // dark gray
+            } 
+            else if (this.world === "volcano") {
+                context.fillStyle = "#5a0b0b"; // dark red
+            } 
+            else {
+                context.fillStyle = "brown"; // fallback
+            }
+
+            context.fillRect(
+                0,
+                this.height - this.floorHeight,
+                this.width,
+                this.floorHeight
+            );
+
+            context.restore();
         }
     }
 

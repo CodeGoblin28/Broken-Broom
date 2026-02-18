@@ -26,3 +26,7 @@ html, body {
 #layerVol1, #layerVol2, #layerVol3, #layerVol4, #layerVol5 {
     display: none;
 }
+
+#layerSky1, #layerSky2, #layerSky3, #layerSky4, #layerSky5 {
+    display: none;
+}
