@@ -11,12 +11,6 @@
         width: 100vw;
         height: 100vh;
         overflow: hidden;
-
-        background-image: url("asset/origbig.png");
-        background-repeat: repeat-x;
-        background-size: auto 100%;
-        background-position: 0 0;
-
         position: relative;
     }
 
@@ -25,7 +19,7 @@
         content: "";
         position: absolute;
         inset: 0;
-        background: rgba(0, 0, 0, 0.6);
+        background: rgba(0, 0, 0, 0.4);
         z-index: 1;
     }
 
@@ -51,14 +45,41 @@
     .world:hover {
         transform: scale(1.1);
     }
-</style>
+
+    .back-button {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        z-index: 3; /* Above overlay */
+
+        padding: 10px 20px;
+        font-size: 18px;
+        font-weight: bold;
+
+        color: white;
+        background: rgba(0, 0, 0, 0.6);
+        border: 2px solid white;
+        border-radius: 8px;
+
+        cursor: pointer;
+        transition: 0.2s ease;
+    }
+
+    .back-button:hover {
+        background: white;
+        color: black;
+        transform: scale(1.05);
+    }
+    </style>
 </head>
 
 <body>
 
+<button class="back-button">← Back</button>
+
 <div class="worlds">
     <div class="world" data-world="forest">
-        <img src="asset/worlds/forest.png" alt="Forest">
+        <img src="asset/worlds/Forest.png" alt="Forest">
     </div>
 
     <div class="world" data-world="cave">
@@ -75,21 +96,38 @@
 </div>
 
 <script>
-    // Moving background (same as index)
-    let bgX = 0;
-    const speed = 0.3;
+    const body = document.body;
 
-    function scrollBackground() {
-        bgX -= speed;
-        document.body.style.backgroundPositionX = `${bgX}px`;
-        requestAnimationFrame(scrollBackground);
-    }
-    scrollBackground();
+    // Background paths
+    const backgrounds = {
+        forest: "asset/Background/Forest/Forest.png",
+        cave: "asset/Background/Cave/Cave.png",
+        volcano: "asset/Background/Volcano/Volcano.png",
+        sky: "asset/Background/Sky/Sky.png"
+    };
 
-    // World selection
+    // Back button
+    document.querySelector('.back-button').addEventListener('click', () => {
+        window.location.href = "index.html";
+    });
+
+    // ✅ Default background = Forest
+    body.style.backgroundImage = `url(${backgrounds.forest})`;
+    body.style.backgroundRepeat = "no-repeat";
+    body.style.backgroundSize = "cover";
+    body.style.backgroundPosition = "center";
+
     const worlds = document.querySelectorAll('.world');
 
     worlds.forEach(world => {
+
+        // 🔥 Change background on hover
+        world.addEventListener('mouseenter', () => {
+            const selectedWorld = world.dataset.world;
+            body.style.backgroundImage = `url(${backgrounds[selectedWorld]})`;
+        });
+
+        // 🎮 Click → go to game
         world.addEventListener('click', () => {
             const selectedWorld = world.dataset.world;
             window.location.href = `game.html?world=${selectedWorld}`;

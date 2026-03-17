@@ -1,16 +1,16 @@
 export class Coin {
     constructor(game){
         this.game = game;
-        this.width = 40;
-        this.height = 40;
+        this.width = 50;
+        this.height = 50;
 
         this.x = this.game.width + Math.random() * 200;
-        this.y = this.game.height - this.height - this.game.groundMargin - Math.random() * 150;
+        this.y = this.game.height - this.height - this.game.groundMargin - Math.random() * 500;
 
         this.speedX = this.game.speed * .8;
         this.markForDeletion = false;
 
-        this.image = document.getElementById('coin'); // Add this image in HTML
+        this.image = document.getElementById('coin');
     }
 
     update(deltaTime){
@@ -33,11 +33,22 @@ export class Coin {
     }
 
     checkCollision(player){
+
+        const playerLeft   = player.x + player.hitbox.offsetX;
+        const playerRight  = playerLeft + player.hitbox.width;
+        const playerTop    = player.y + player.hitbox.offsetY;
+        const playerBottom = playerTop + player.hitbox.height;
+
+        const coinLeft   = this.x;
+        const coinRight  = this.x + this.width;
+        const coinTop    = this.y;
+        const coinBottom = this.y + this.height;
+
         return (
-            player.x < this.x + this.width &&
-            player.x + player.width > this.x &&
-            player.y < this.y + this.height &&
-            player.y + player.height > this.y
+            playerLeft < coinRight &&
+            playerRight > coinLeft &&
+            playerTop < coinBottom &&
+            playerBottom > coinTop
         );
     }
 }

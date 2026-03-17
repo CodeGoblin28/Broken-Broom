@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Scrolling Background</title>
+<title>Broken Broom</title>
 
 <style>
     body {
@@ -12,76 +12,353 @@
         height: 100vh;
         overflow: hidden;
 
-        background-image: url("asset/origbig.png");
-        background-repeat: repeat-x;
-        background-size: auto 100%;
-        background-position: 0 0;
+        /* NEW BACKGROUND */
+        background-image: url("asset/title1.png");
+        background-repeat: no-repeat;
+        background-position: center top;
+        background-size: cover;
 
         position: relative;
+        font-family: 'Courier New', monospace;
     }
 
-    /* Dark overlay */
+    /* Optional dark overlay for readability */
     body::before {
         content: "";
         position: absolute;
         inset: 0;
-        background: rgba(0, 0, 0, 0.6);
+        background: linear-gradient(to bottom, rgba(0,0,0,0.1), rgba(0,0,0,0.5));
         z-index: 1;
     }
 
-    .title {
-        position: absolute;
-        inset: 0;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 2;
-        flex-direction: column;
-        gap: 20px;
-    }
+/* Button container */
+.menu {
+    position: absolute;
+    bottom: 40px;
+    right: 40px;
 
-    .start-btn {
-        margin-top: 20px;
-        padding: 12px 40px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
 
-        font-family: 'Courier New', monospace;
-        font-size: 24px;
-        color: white;
-        text-decoration: none;
-        letter-spacing: 2px;
+    z-index: 2;
+}
 
-        border: 3px solid white;
-        background: transparent;
+/* All buttons share same style */
+.menu a {
+    padding: 14px 50px;
+    font-size: 22px;
+    color: white;
+    text-decoration: none;
+    letter-spacing: 3px;
+    text-align: center;
 
-        transition: all 0.2s ease;
-    }
+    border: 3px solid white;
+    background: rgba(0,0,0,0.4);
 
-    .start-btn:hover {
-        background: white;
-        color: black;
-        transform: scale(1.05);
-    }
+    transition: all 0.2s ease;
+}
+
+.menu a:hover {
+    background: white;
+    color: black;
+    transform: translateX(-5px);
+    box-shadow: 0 0 20px white;
+}
+
+/* SETTINGS PANEL OVERLAY */
+.settings-panel {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.7);
+    display: none; /* hidden by default */
+    justify-content: center;
+    align-items: center;
+    z-index: 5;
+}
+
+/* Settings box */
+.settings-box {
+    background: rgba(0,0,0,0.85);
+    border: 3px solid white;
+    padding: 40px;
+    width: 500px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    text-align: center;
+
+    max-height: 80vh;
+    overflow-y: auto;
+}
+
+.settings-box h2 {
+    margin: 0 0 10px 0;
+    color: white;
+    letter-spacing: 3px;
+}
+
+.settings-box button {
+    padding: 12px;
+    font-size: 16px;
+    letter-spacing: 2px;
+    background: transparent;
+    color: white;
+    border: 2px solid white;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.settings-box button:hover {
+    background: white;
+    color: black;
+}
+
+/* Icon row for About + Settings */
+.icon-row{
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.icon-row img{
+    width: 48px;
+    height: 48px;
+    cursor: pointer;
+    transition: 0.2s;
+}
+
+.icon-row img:hover{
+    transform: scale(1.15);
+    filter: drop-shadow(0 0 10px white);
+}
+
+
+
+.inventory-grid{
+    display:grid;
+    grid-template-columns: repeat(3,1fr);
+    gap:10px;
+}
+
+.inventory-item{
+    background:rgba(255,255,255,0.1);
+    border:2px solid white;
+    padding:10px;
+    text-align:center;
+    color:white;
+}
+
+.inventory-item img{
+    width:50px;
+}
+
+.inventory-item button{
+    margin-top:6px;
+    padding:4px 8px;
+    font-size:12px;
+}
 </style>
 </head>
 
 <body>
-    <div class="title">
-        <img src="asset/Title.png" alt="">
-        <a href="level-selection.html" class="start-btn">START</a>
+
+
+<div class="menu">
+    <a href="level-selection.html">START</a>
+    <a href="shop.html">SHOP</a>
+
+    <div class="icon-row">
+        <img src="asset/icons/sack.png" id="sackBTN">
+        <img src="asset/icons/settings.png" id="settingsBtn">
+        <img src="asset/icons/about.png" id="aboutBtn">
     </div>
+</div>
+
+<div class="settings-panel" id="settingsPanel">
+    <div class="settings-box">
+        <h2>SETTINGS</h2>
+
+        <button>RESET COINS</button>
+        <button>RESET PROGRESSION</button>
+        <button>DEV MODE</button>
+        <button id="backBtn">BACK</button>
+    </div>
+</div>
+
+<div class="settings-panel" id="aboutPanel">
+    <div class="settings-box">
+        <h2>ABOUT</h2>
+
+        <p style="color:white; font-size:14px; line-height:1.6;">
+        Broken Broom is a fantasy endless runner where a witch
+        travels across dangerous worlds collecting coins and items to fix her broom, while avoiding enemies.
+        <br><br>
+        Disclaimer: I do not own the assests used in this game, credit belongs to respected owners.
+        <br><br>
+        Developed as a student project.
+        <br><br>
+        © 2026 Broken Broom
+        </p>
+
+        <button id="aboutBackBtn">BACK</button>
+    </div>
+</div>
+
+<div class="settings-panel" id="inventoryPanel">
+    <div class="settings-box" style="width:500px">
+
+        <h2>INVENTORY</h2>
+
+        <h3 style="color:white">Skins</h3>
+        <div id="skinInventory" class="inventory-grid"></div>
+
+        <h3 style="color:white">Upgrades</h3>
+        <div id="upgradeInventory" class="inventory-grid"></div>
+
+        <button id="inventoryBackBtn">BACK</button>
+
+    </div>
+</div>
 
 <script>
-    let bgX = 0;
-    const speed = 0.3; // pixels per frame
+const sackBTN = document.getElementById('sackBTN');
+const settingsBtn = document.getElementById('settingsBtn');
+const aboutBtn = document.getElementById('aboutBtn');
 
-    function scrollBackground() {
-        bgX -= speed;
-        document.body.style.backgroundPositionX = `${bgX}px`;
+const settingsPanel = document.getElementById('settingsPanel');
+const aboutPanel = document.getElementById('aboutPanel');
 
-        requestAnimationFrame(scrollBackground);
-    }
+const backBtn = document.getElementById('backBtn');
+const aboutBackBtn = document.getElementById('aboutBackBtn');
 
-    scrollBackground();
+const menu = document.querySelector('.menu');
+
+settingsBtn.addEventListener('click', () => {
+    settingsPanel.style.display = "flex";
+    menu.style.display = "none";
+});
+
+aboutBtn.addEventListener('click', () => {
+    aboutPanel.style.display = "flex";
+    menu.style.display = "none";
+});
+
+backBtn.addEventListener('click', () => {
+    settingsPanel.style.display = "none";
+    menu.style.display = "flex";
+});
+
+aboutBackBtn.addEventListener('click', () => {
+    aboutPanel.style.display = "none";
+    menu.style.display = "flex";
+});
+
+sackBTN.addEventListener('click', () => {
+
+    loadInventory();
+
+    inventoryPanel.style.display = "flex";
+    menu.style.display = "none";
+
+});
+
+inventoryBackBtn.addEventListener('click', () => {
+
+    inventoryPanel.style.display = "none";
+    menu.style.display = "flex";
+
+});
+
+
+const skins = [
+
+{ id:"default", name:"Default", image:"asset/shop/default_skin.png" },
+{ id:"blue", name:"Blue", image:"asset/shop/blue_skin.png" },
+{ id:"red", name:"Red", image:"asset/shop/red_skin.png" },
+{ id:"pink", name:"Pink", image:"asset/shop/pink_skin.png" }
+
+];
+
+const upgrades = [
+
+{ id:"upgrade_luck", name:"Luck UP", image:"asset/shop/luck.png" },
+{ id:"healthUp", name:"Health UP", image:"asset/shop/healthUp.png" },
+{ id:"upgrade_shield", name:"Shield", image:"asset/shop/shield.png" }
+
+];
+
+function loadInventory(){
+
+const skinContainer = document.getElementById("skinInventory");
+const upgradeContainer = document.getElementById("upgradeInventory");
+
+skinContainer.innerHTML = "";
+upgradeContainer.innerHTML = "";
+
+const equipped = localStorage.getItem("equippedSkin") || "default";
+
+
+/* SKINS */
+
+skins.forEach(skin => {
+
+const owned =
+skin.id === "default" ||
+localStorage.getItem(skin.id) === "owned";
+
+if(!owned) return;
+
+const div = document.createElement("div");
+div.className = "inventory-item";
+
+const equippedText = equipped === skin.id ? "EQUIPPED" : "EQUIP";
+
+div.innerHTML = `
+<img src="${skin.image}">
+<p>${skin.name}</p>
+<button>${equippedText}</button>
+`;
+
+const btn = div.querySelector("button");
+
+btn.onclick = () => {
+
+localStorage.setItem("equippedSkin", skin.id);
+
+loadInventory();
+
+};
+
+skinContainer.appendChild(div);
+
+});
+
+
+/* UPGRADES */
+
+upgrades.forEach(upgrade => {
+
+const owned = localStorage.getItem(upgrade.id) === "owned";
+
+if(!owned) return;
+
+const div = document.createElement("div");
+div.className = "inventory-item";
+
+div.innerHTML = `
+<img src="${upgrade.image}">
+<p>${upgrade.name}</p>
+<p>OWNED</p>
+`;
+
+upgradeContainer.appendChild(div);
+
+});
+
+}
 </script>
+
 </body>
 </html>

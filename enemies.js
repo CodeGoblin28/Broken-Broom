@@ -6,6 +6,13 @@ class Enemy {
         this.frameInterval = 1000/this.fps;
         this.frameTimer = 0;
         this.markForDeletion = false;
+
+        this.hitbox = {
+            offsetX: 0,
+            offsetY: 0,
+            width: 0,
+            height: 0
+        };
     }
     update(deltaTime){
         this.x -= this.speedX;
@@ -22,8 +29,18 @@ class Enemy {
         if (this.x + this.width < 0) this.markForDeletion = true;
     }
     draw(context){
-        if (this.game.debug) context.strokeRect(this.x, this.y, this.width, this.height);
-        context.drawImage(this.image, this.frameX * this.width, 0, this.width, this.height, this.x, this.y, this.width, this.height);
+        if (this.game.debug) {
+            context.strokeStyle = "lime"; 
+            context.strokeRect(this.x, this.y, this.width, this.height)
+            
+            context.strokeStyle = "yellow";
+            context.strokeRect(
+            this.x + this.hitbox.offsetX,
+            this.y + this.hitbox.offsetY,
+            this.hitbox.width,
+            this.hitbox.height);
+        };
+        context.drawImage(this.image, this.frameX * this.width, this.frameY * this.height, this.width, this.height, this.x, this.y, this.width, this.height);
     }
 }
 
@@ -33,10 +50,14 @@ export class FlyingEnemy extends Enemy {
         this.game = game;
         this.x = this.game.width + Math.random() * this.game.width * 0.5;
         this.y = Math.random() * this.game.height * 0.5;
-        this.speedX = Math.random() + 1;
+        this.speedX = 1;
     }
 }
 
+
+///////////////////////////////////////////
+// FOREST //
+//////////////////////////////////////////
 export class Fly extends FlyingEnemy {
     constructor(game){
         super(game);
@@ -48,6 +69,13 @@ export class Fly extends FlyingEnemy {
         this.image = document.getElementById('enemy_fly');
         this.angle = 0;
         this.va = Math.random() * 0.1 + 0.1;
+
+        this.hitbox = {
+            offsetX: 0,
+            offsetY: 0,
+            width: this.width,
+            height: this.height
+        };
     }
     update(deltaTime){
         super.update(deltaTime);
@@ -55,6 +83,220 @@ export class Fly extends FlyingEnemy {
         this.y += Math.sin(this.angle);
     }
 }
+
+export class Tulip extends Enemy {
+    constructor(game){
+        super();
+        this.game = game;
+        this.width = 62.18;
+        this.height = 100;
+        this.x = this.game.width;
+        this.y = this.game.height - this.height - this.game.groundMargin;
+        this.image = document.getElementById('enemy_plant');
+        this.speedX = 1.6;
+        this.speedY = 0;    
+        this.maxFrame = 10;
+
+        this.hitbox = {
+            offsetX: 0,
+            offsetY: 20,
+            width: this.width,
+            height: this.height -20
+        };
+    }
+}
+
+export class FallingBranch extends Enemy {
+    constructor(game){
+        super();
+        this.game = game;
+        this.width = 101;
+        this.height = 38;
+
+        // Spawn above player
+        this.x = this.game.player.x + this.game.player.width / 2 - this.width / 2;
+        this.y = 0 - this.height;
+
+        this.image = document.getElementById('branch');
+        this.speedX = 0;
+        this.speedY = 3;    
+        this.maxFrame = 0;
+
+        // Warning phase
+        this.warningDuration = 1000; // 1 second
+        this.warningTimer = 0;
+        this.isFalling = false;
+
+        this.hitbox = {
+            offsetX: 0,
+            offsetY: 0,
+            width: this.width,
+            height: this.height
+        };
+
+        // Get the warning image
+        this.warningImage = document.getElementById('warning');
+    }
+
+    update(deltaTime){
+        if(!this.isFalling){
+            // Warning phase
+            this.warningTimer += deltaTime;
+            if(this.warningTimer >= this.warningDuration){
+                this.isFalling = true; // branch starts falling
+            }
+        } else {
+            // Falling phase
+            super.update(deltaTime);
+
+            const ground = this.game.height - this.height - this.game.groundMargin;
+            if(this.y > ground){
+                this.markForDeletion = true;
+            }
+        }
+    }
+
+    draw(context){
+        if(!this.isFalling){
+            // Draw warning at top of screen
+            const warningSize = 70; // size in px, square
+            context.drawImage(
+                this.warningImage,
+                this.x + this.width/2 - warningSize/2, // center above branch
+                50,                                   // fixed y
+                warningSize,                           // width
+                warningSize                            // height
+            );
+        } else {
+            super.draw(context);
+        }
+    }
+}
+
+export class Slime extends Enemy {
+    constructor(game){
+        super();
+        this.game = game;
+
+        this.width = 80;
+        this.height = 50;
+
+        this.x = this.game.width;
+        this.y = this.game.height - this.height - this.game.groundMargin;
+
+        this.image = document.getElementById('slime');
+
+        this.baseSpeed = 1.6;
+        this.jumpSpeed = 4;
+        this.speedX = this.baseSpeed;
+
+        this.speedY = 0;
+        this.maxFrame = 1;
+
+        // jump physics
+        this.vy = 0;
+        this.gravity = 2000;
+        this.jumpForce = 900;
+
+        // jump timing
+        this.jumpTimer = 0;
+        this.jumpInterval = 500 + Math.random() * 1000;
+
+        this.hitbox = {
+            offsetX: 0,
+            offsetY: 0,
+            width: this.width,
+            height: this.height
+        };
+    }
+
+    update(deltaTime){
+        super.update(deltaTime);
+
+        const dt = deltaTime * 0.001;
+
+        // gravity
+        this.y += this.vy * dt;
+        this.vy += this.gravity * dt;
+
+        const ground = this.game.height - this.height - this.game.groundMargin;
+
+        if(this.y >= ground){
+            this.y = ground;
+            this.vy = 0;
+
+            // reset speed when landing
+            this.speedX = this.baseSpeed;
+
+            this.jumpTimer += deltaTime;
+
+            if(this.jumpTimer > this.jumpInterval){
+                this.vy = -this.jumpForce;
+                this.speedX = this.jumpSpeed;
+                this.jumpTimer = 0;
+            }
+        }
+    }
+}
+
+
+///////////////////////////////////////////
+// CAVE //
+//////////////////////////////////////////
+
+export class Ghost extends FlyingEnemy {
+    constructor(game){
+        super(game);
+        this.width = 72;
+        this.height = 104;
+        this.speedX = 1.5;
+        this.speedY = 0;
+        this.maxFrame = 3;
+        this.image = document.getElementById('ghost');
+        this.y = this.game.height - this.height - this.game.groundMargin - Math.random() * 600;
+
+        this.angle = 20;
+        this.va = Math.random() * 0.1 + 0.1;
+
+        this.hitbox = {
+            offsetX: 10,
+            offsetY: 0,
+            width: this.width - 10,
+            height: this.height - 10
+        };
+    }
+    update(deltaTime){
+        super.update(deltaTime);
+        this.angle += this.va;
+        this.y += Math.sin(this.angle);
+    }
+}
+
+export class Spidercrawler extends Enemy {
+    constructor(game){
+        super(game);
+        this.game = game;
+        this.width = 166.8;
+        this.height = 72;
+        this.x = this.game.width;
+        this.y = this.game.height - this.height - this.game.groundMargin;
+        this.image = document.getElementById('spidercrawler');
+        this.speedX = 2;
+        this.speedY = 0;    
+        this.maxFrame = 4;
+
+        this.hitbox = {
+            offsetX: 30,
+            offsetY: 0,
+            width: this.width - 30,
+            height: this.height 
+        };
+    }
+}
+
+///////////////////////////////////////////
+// VOLCANO //
+//////////////////////////////////////////
 
 export class FireSpirit extends FlyingEnemy {
     constructor(game){
@@ -65,27 +307,177 @@ export class FireSpirit extends FlyingEnemy {
         this.speedY = 0;
         this.maxFrame = 7;
         this.image = document.getElementById('fire_spirit');
+
+        this.hitbox = {
+            offsetX: 12.5,
+            offsetY: 12.5,
+            width: this.width - 25,
+            height: this.height - 25
+        };
     }    
 }
 
-
-
-
-export class GroundEnemy extends Enemy {
+export class Golem extends Enemy {
     constructor(game){
-        super();
+        super(game);
         this.game = game;
-        this.width = 60;
-        this.height = 87;
+        this.width = 120;
+        this.height = 120;
         this.x = this.game.width;
         this.y = this.game.height - this.height - this.game.groundMargin;
-        this.image = document.getElementById('enemy_plant');
-        this.speedX = 1.6;
+        this.image = document.getElementById('golem');
+        this.speedX = 2;
         this.speedY = 0;    
-        this.maxFrame = 1;
+        this.maxFrame = 9;
+
+        this.hitbox = {
+            offsetX: 15,
+            offsetY: 30,
+            width: this.width - 30,
+            height: this.height -30
+        };
     }
 }
 
-export class ClimbingEnemy extends Enemy {
-    
+///////////////////////////////////////////
+// SKY //
+//////////////////////////////////////////
+
+export class Raven extends FlyingEnemy {
+    constructor(game){
+        super(game);
+        this.width = 97.83;
+        this.height = 70;
+        this.speedX = 2;
+        this.speedY = 0;
+        this.maxFrame = 5;
+        this.image = document.getElementById('raven');
+        this.y = Math.random() * (this.game.height - this.height);
+
+        this.hitbox = {
+            offsetX: 0,
+            offsetY: 10,
+            width: this.width,
+            height: this.height - 20
+        };
+    }    
+}
+
+export class AngryCloud extends FlyingEnemy {
+    constructor(game){
+        super(game);
+        this.width = 58;
+        this.height = 50;
+        this.speedX = 3;
+        this.speedY = 0;
+        this.maxFrame = 3;
+        this.image = document.getElementById('angry_cloud');
+        this.y = Math.random() * this.game.height;
+        this.followSpeed = .4;
+
+        this.hitbox = {
+            offsetX: 0,
+            offsetY: 0,
+            width: this.width,
+            height: this.height
+        };
+    }    
+    update(deltaTime){
+        super.update(deltaTime);
+
+        // Follow player Y smoothly
+        const playerY = this.game.player.y;
+
+        if (this.y < playerY) {
+            this.y += this.followSpeed;
+        } 
+        else if (this.y > playerY) {
+            this.y -= this.followSpeed;
+        }
+    }
+}
+export class meteor extends FlyingEnemy {
+    constructor(game){
+        super(game);
+        this.width = 229;
+        this.height = 193;
+        this.speedX = 5;
+        this.speedY = .5;
+        this.maxFrame = 7;
+        this.image = document.getElementById('meteor');
+        this.y = Math.random() * this.game.height * 0.7;
+
+        this.hitbox = {
+            offsetX: 10,
+            offsetY: 20,
+            width: this.width - 80,
+            height: this.height - 40
+        };
+    }
+}
+
+export class Dragon extends FlyingEnemy {
+    constructor(game){
+        super(game);
+        this.width = 244;
+        this.height = 261;
+        this.speedX = 4;
+        this.speedY = 0;
+        this.frameY = 0;
+        this.maxFrame = 5;
+        this.image = document.getElementById('dragon');
+        this.y = Math.random() * (this.game.height - this.height);
+
+        this.hitbox = {
+            offsetX: 25,
+            offsetY: 50,
+            width: this.width - 50,
+            height: this.height - 100
+        };
+    }
+}
+
+
+export class ClimbingSpider extends Enemy {
+    constructor(game){
+        super();
+        this.game = game;
+        this.width = 120;
+        this.height = 144;
+        this.x = this.game.width;
+        this.y = Math.random() * this.game.height * 0.5;
+
+
+        this.speedX = 1.6;
+        this.speedY = Math.random() > 0.5 ? 1 : -1;
+
+        this.maxFrame = 5;
+        this.image = document.getElementById('spider_big');
+
+
+        this.hitbox = {
+            offsetX: 10,
+            offsetY: 10,
+            width: this.width - 20,
+            height: this.height - 20
+        };
+    }    
+    update(deltaTime){
+        super.update(deltaTime);
+        if(this.y > this.game.height - this.height - this.game.groundMargin){
+            this.speedY *= -1;
+        }
+
+        if(this.y < -this.height + this.height){
+            this.speedY *= -1;
+        }
+
+    }    
+    draw(context){
+        super.draw(context);
+        context.beginPath();
+        context.moveTo(this.x + this.width/2,0);
+        context.lineTo(this.x + this.width/2, this.y + 50);
+        context.stroke();
+    }
 }

@@ -1,8 +1,11 @@
 import { Player } from "./player.js";
 import { InputHandler } from "./input.js";
 import { BackgroundForest, BackgroundCave, BackgroundVolcano, BackgroundSky } from "./background.js";
-import { Fly, FireSpirit, ClimbingEnemy, GroundEnemy } from "./enemies.js";
+import { Fly, ClimbingSpider, FireSpirit, Ghost, meteor, Tulip, Spidercrawler, AngryCloud, Raven, Golem, Slime, Dragon, FallingBranch } from "./enemies.js";
 import { Coin } from "./coins.js";
+import { UI } from "./UI.js";
+import { Stick, Web, Ruby } from "./questItems.js";
+// import { Boss } from "./boss.js";
 
 window.addEventListener('load', function(){
     const canvas = document.getElementById('canvas1');
@@ -19,7 +22,11 @@ window.addEventListener('load', function(){
             this.width = width;
             this.height = height;
             this.groundMargin = 50;
-            this.speed = 2;
+            this.speed = 0;
+
+            this.playerStillTimer = 0;
+            this.playerStillThreshold = 500; // 1.5 seconds
+            this.lastPlayerX = 0;
 
             // Choose background based on world
             if (world === "cave") {
@@ -43,6 +50,20 @@ window.addEventListener('load', function(){
             this.coinTimer = 0;
             this.coinInterval = 3000; // spawn every 3 seconds
 
+            this.questItems = [];
+            this.questItemTimer = 0;
+            this.questItemInterval = 10000; // spawn every 10 seconds
+            this.questItemAmount = 1;
+            this.questComplete = false;
+
+            this.questItemsCollected = 0;       // how many quest items collected
+            this.questItemImage = null;         // image element of current world's quest item
+
+            // Set the image based on the world
+            if(this.world === "forest") this.questItemImage = document.getElementById('stick');
+            else if(this.world === "cave") this.questItemImage = document.getElementById('web');
+            else if(this.world === "volcano") this.questItemImage = document.getElementById('ruby');
+
             // Load saved coins
             this.coinCount = parseInt(localStorage.getItem("coins")) || 0;
 
@@ -54,12 +75,31 @@ window.addEventListener('load', function(){
             this.enemyInterval = 2000;
 
             this.debug = false;
+
+            this.ui = new UI(this);
+
+            this.gameStarted = false;
+
+            this.gameOver = true;
+
+            this.damage = false;
+
         }
         update(deltaTime){
             // If Escape is pressed → go back to index
             if (this.input.keys.includes("Escape")) {
                 window.location.href = "index.html";
             }
+
+            const movementKeys = ['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','a','d','w','s'];
+
+            if (!this.gameStarted) {
+                if (this.input.keys.some(key => movementKeys.includes(key))) {
+                    this.gameStarted = true;
+                }
+            }
+
+            this.speed = this.gameStarted ? 2 : 0;
 
             // Coin spawning
             if(this.coinTimer > this.coinInterval){
@@ -76,9 +116,44 @@ window.addEventListener('load', function(){
                 }
             });
 
+            // Check if quest is complete
+            if (this.questItemsCollected >= this.questItemAmount && !this.questComplete) {
+                this.questComplete = true;
+
+                // Remove remaining quest items
+                this.questItems.forEach(item => item.markForDeletion = true);
+
+                console.log("Quest Complete! All quest items removed.");
+            }
+
+            // Spawn quest items only if quest not complete
+            if(this.questItemsCollected < this.questItemAmount){
+                if(this.questItemTimer > this.questItemInterval){
+                    this.addQuestItem();
+                    this.questItemTimer = 0;
+                } else {
+                    this.questItemTimer += deltaTime;
+                }
+            }
+
+            // Update quest items
+            this.questItems.forEach((item, index) => {
+                item.update(deltaTime);
+                if(item.markForDeletion) this.questItems.splice(index, 1);
+            });
+
 
             this.background.update();
             this.player.update(this.input.keys, deltaTime);
+
+            // detect if player stopped moving
+            if (Math.abs(this.player.x - this.lastPlayerX) < 1) {
+                this.playerStillTimer += deltaTime;
+            } else {
+                this.playerStillTimer = 0;
+            }
+
+            this.lastPlayerX = this.player.x;
 
             // Handles Enemies
             if(this.enemyTimer > this.enemyInterval){
@@ -87,6 +162,7 @@ window.addEventListener('load', function(){
             } else {
                 this.enemyTimer += deltaTime;
             }
+
             this.enemies.forEach(enemy => {
                 enemy.update(deltaTime);
                 if(enemy.markForDeletion) this.enemies.splice(this.enemies.indexOf(enemy), 1);
@@ -106,19 +182,61 @@ window.addEventListener('load', function(){
                 coin.draw(context);
             });
 
-            // Draw coin counter UI
-            context.fillStyle = "white";
-            context.font = "30px Arial";
-            context.fillText("Coins: " + this.coinCount, 20, 50);
+            this.questItems.forEach(item => item.draw(context));
+
+            this.ui.draw(context);
+        }
+
+        addQuestItem(){
+            // Stop spawning if already reached the quest limit
+            if(this.questItemsCollected >= this.questItemAmount) return;
+
+            if(this.world === "forest"){
+                this.questItems.push(new Stick(this));
+            } else if(this.world === "cave"){
+                this.questItems.push(new Web(this));
+            } else if(this.world === "volcano"){
+                this.questItems.push(new Ruby(this));
+            }
+            // add more worlds/items as needed
+        }
+
+        addQuest(){
+            this.questItemsCollected++;
         }
 
 
         addEnemy(){
-            if (this.speed > 0 && Math.random() < 0.3) this.enemies.push(new GroundEnemy(this));
-            this.enemies.push(new Fly(this));
+            if (this.speed <= 0) return;
+
+            if(this.world === "forest") {
+                if (Math.random() < 0.4){
+                    this.enemies.push(new Tulip(this));
+                } else if (Math.random() < 0.6) this.enemies.push(new Slime(this));
+
+                if (this.playerStillTimer > this.playerStillThreshold){
+                    this.enemies.push(new FallingBranch(this));
+                    this.playerStillTimer = 0; // reset timer
+                }
+                // this.enemies.push(new Fly(this));
+            }
+
+            if(this.world === "cave") {
+                if (Math.random() < 0.3) this.enemies.push(new Ghost(this));
+                else if (Math.random() < 0.3) this.enemies.push(new ClimbingSpider(this));
+                if (Math.random() < 0.3) this.enemies.push(new Spidercrawler(this));
+            }
 
             if(this.world === "volcano") {
-                this.enemies.push(new FireSpirit(this));
+                if (this.speed > 0) this.enemies.push(new FireSpirit(this));
+                if (Math.random() < 0.3) this.enemies.push(new Golem(this));
+            }
+
+            if(this.world === "sky") {
+                if (Math.random() < 0.9) this.enemies.push(new Raven(this));
+                if (Math.random() < 0.3) this.enemies.push(new meteor(this));
+                if (Math.random() < 0.3) this.enemies.push(new AngryCloud(this));
+                if (Math.random() < 0.3) this.enemies.push(new Dragon(this));
             }
             console.log(this.enemies);
         }
@@ -130,23 +248,14 @@ window.addEventListener('load', function(){
         }
 
         drawFloor(context){
-            if (this.world === "sky") return;
+            if (this.world === "sky" || this.world === "forest" || this.world === "cave") return;
 
             context.save();
 
-            // Choose floor color based on world
-            if (this.world === "forest") {
-                context.fillStyle = "#3a5f0b"; // dark green
-            } 
-            else if (this.world === "cave") {
-                context.fillStyle = "#2f2f2f"; // dark gray
-            } 
-            else if (this.world === "volcano") {
+            if (this.world === "volcano") {
                 context.fillStyle = "#5a0b0b"; // dark red
             } 
-            else {
-                context.fillStyle = "brown"; // fallback
-            }
+
 
             context.fillRect(
                 0,
