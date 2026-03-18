@@ -27,7 +27,11 @@ export class Idle extends State{
         if (input.includes('ArrowLeft') || input.includes('ArrowRight') || input.includes('a') || input.includes('d')){
             this.player.setState(states.RUNNING);
         } else if (input.includes('ArrowUp') || input.includes('w')){
-            this.player.setState(states.JUMPING);
+            if (this.player.game.world === "cave" || this.player.game.world === "volcano"){
+                this.player.setState(states.TAKEOFF);
+            } else {
+                this.player.setState(states.JUMPING);
+            }
         }
     }
 }
@@ -43,11 +47,12 @@ export class Running extends State{
         this.player.maxFrame = 9;
     }
     handleInput(input){
-        // if (!input.includes('ArrowLeft') && !input.includes('ArrowRight')){
-        //     this.player.setState(states.IDLE);
-        // } else 
-            if (input.includes('ArrowUp') || input.includes('w')){
-            this.player.setState(states.JUMPING);
+        if (input.includes('ArrowUp') || input.includes('w')){
+            if (this.player.game.world === "cave" || this.player.game.world === "volcano"){
+                this.player.setState(states.TAKEOFF);
+            } else {
+                this.player.setState(states.JUMPING);
+            }
         }
     }
 }
@@ -101,6 +106,12 @@ export class Flying extends State{
         this.player.maxFrame = 3;
     }
     handleInput(input){
+        const isSky = this.player.game.world === "sky";
+
+        if (this.player.onGround() && !isSky){
+            this.player.setState(states.RUNNING);
+        }
+
         // Optional: allow vertical control
         if (input.includes('ArrowUp') || input.includes('w')) {
             this.player.vy = -500;
@@ -109,7 +120,35 @@ export class Flying extends State{
             this.player.vy = 500;
         } 
         else {
-            this.player.vy = 0;
+            if (isSky) {
+                // float in sky
+                this.player.vy = 0;
+            }    
         }
+    }
+}
+
+export class TakeOff extends State{
+    constructor(player){
+        super('TAKEOFF');
+        this.player = player;
+    }
+    enter(){
+        this.player.frameX = 0;
+        this.player.frameY = 6;
+        this.player.maxFrame = 5;
+
+        this.finished = false;
+    }
+    handleInput(input){
+        // When animation finishes → go to flying
+        if (!this.finished && this.player.frameX === this.player.maxFrame){
+            this.finished = true;
+            this.player.setState(states.FLYING);
+        }
+
+        if (input.includes('ArrowUp') || input.includes('w')) {
+            this.player.vy = -500;
+        } 
     }
 }

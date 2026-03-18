@@ -1,10 +1,11 @@
 import { Player } from "./player.js";
 import { InputHandler } from "./input.js";
 import { BackgroundForest, BackgroundCave, BackgroundVolcano, BackgroundSky } from "./background.js";
-import { Fly, ClimbingSpider, FireSpirit, Ghost, meteor, Tulip, Spidercrawler, AngryCloud, Raven, Golem, Slime, Dragon, FallingBranch } from "./enemies.js";
+import { Fly, ClimbingSpider, FireSpirit, Ghost, meteor, Tulip, Spidercrawler, AngryCloud, Raven, Golem, Slime, Dragon, FallingBranch, lava_shark, Devil, FireBall, Wolf } from "./enemies.js";
 import { Coin } from "./coins.js";
 import { UI } from "./UI.js";
 import { Stick, Web, Ruby } from "./questItems.js";
+
 // import { Boss } from "./boss.js";
 
 window.addEventListener('load', function(){
@@ -72,7 +73,9 @@ window.addEventListener('load', function(){
 
             this.enemies = [];
             this.enemyTimer = 0;
-            this.enemyInterval = 2000;
+            this.enemyInterval = 1500;
+
+            this.collisions = [];
 
             this.debug = false;
 
@@ -80,16 +83,39 @@ window.addEventListener('load', function(){
 
             this.gameStarted = false;
 
-            this.gameOver = true;
+            this.gameOver = false;
+            this.restartPressed = false;
+            this.win = false;
 
-            this.damage = false;
+            this.lives = 5;
+
+            this.time = 0;
 
         }
         update(deltaTime){
             // If Escape is pressed → go back to index
-            if (this.input.keys.includes("Escape")) {
+            if (this.input.keys.includes("Escape") && game.gameOver) {
                 window.location.href = "index.html";
             }
+
+            // SPACE handling (restart / continue)
+            if (this.input.keys.includes(' ') && this.gameOver && !this.restartPressed) {
+                this.restartPressed = true;
+
+                if (this.win) {
+                    this.continueGame();
+                } else {
+                    this.restartGame();
+                }
+            }
+
+
+            if (!this.input.keys.includes(' ')){
+                this.restartPressed = false;
+            }
+
+            if (this.gameStarted && !game.gameOver) this.time += deltaTime;
+
 
             const movementKeys = ['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','a','d','w','s'];
 
@@ -99,14 +125,22 @@ window.addEventListener('load', function(){
                 }
             }
 
+            //Win Condition
+            if (this.questItemsCollected == this.questItemAmount && !this.win) {
+                this.gameOver = true;
+                this.win = true;
+            }
+
             this.speed = this.gameStarted ? 2 : 0;
 
             // Coin spawning
-            if(this.coinTimer > this.coinInterval){
-                this.coins.push(new Coin(this));
-                this.coinTimer = 0;
-            } else {
-                this.coinTimer += deltaTime;
+            if(!game.gameOver){
+                if(this.coinTimer > this.coinInterval){
+                    this.coins.push(new Coin(this));
+                    this.coinTimer = 0;
+                } else {
+                    this.coinTimer += deltaTime;
+                }
             }
 
             this.coins.forEach(coin => {
@@ -117,7 +151,7 @@ window.addEventListener('load', function(){
             });
 
             // Check if quest is complete
-            if (this.questItemsCollected >= this.questItemAmount && !this.questComplete) {
+            if (this.questItemsCollected >= this.questItemAmount && !this.questComplete || this.gameOver) {
                 this.questComplete = true;
 
                 // Remove remaining quest items
@@ -134,6 +168,12 @@ window.addEventListener('load', function(){
                 } else {
                     this.questItemTimer += deltaTime;
                 }
+            }
+
+            //Remove remaining enemies
+            if (this.gameOver) {
+                this.enemies.forEach(enemy => enemy.markForDeletion = true);
+                this.coins.forEach(coin => coin.markForDeletion = true);
             }
 
             // Update quest items
@@ -167,12 +207,16 @@ window.addEventListener('load', function(){
                 enemy.update(deltaTime);
                 if(enemy.markForDeletion) this.enemies.splice(this.enemies.indexOf(enemy), 1);
             })
+
+            //handle collision
+            this.collisions.forEach((collision, index) => {
+                collision.update(deltaTime);
+                if (collision.markForDeletion) this.collisions.splice(index, 1);
+            });
         }
         draw(context){
             this.background.draw(context);
             this.player.draw(context);
-
-            this.drawFloor(context);
 
             this.enemies.forEach(enemy => {
                 enemy.draw(context);
@@ -180,6 +224,10 @@ window.addEventListener('load', function(){
 
             this.coins.forEach(coin => {
                 coin.draw(context);
+            });
+
+            this.collisions.forEach(collisions => {
+                collisions.draw(context);
             });
 
             this.questItems.forEach(item => item.draw(context));
@@ -207,7 +255,7 @@ window.addEventListener('load', function(){
 
 
         addEnemy(){
-            if (this.speed <= 0) return;
+            if (this.speed <= 0 || game.gameOver) return;
 
             if(this.world === "forest") {
                 if (Math.random() < 0.4){
@@ -218,18 +266,22 @@ window.addEventListener('load', function(){
                     this.enemies.push(new FallingBranch(this));
                     this.playerStillTimer = 0; // reset timer
                 }
+                if (Math.random() < 0.1) this.enemies.push(new Wolf(this));
                 // this.enemies.push(new Fly(this));
             }
 
             if(this.world === "cave") {
-                if (Math.random() < 0.3) this.enemies.push(new Ghost(this));
-                else if (Math.random() < 0.3) this.enemies.push(new ClimbingSpider(this));
+                if (Math.random() < 0.2) this.enemies.push(new Ghost(this));
+                if (Math.random() < 0.3) this.enemies.push(new ClimbingSpider(this));
                 if (Math.random() < 0.3) this.enemies.push(new Spidercrawler(this));
             }
 
             if(this.world === "volcano") {
-                if (this.speed > 0) this.enemies.push(new FireSpirit(this));
-                if (Math.random() < 0.3) this.enemies.push(new Golem(this));
+                if (Math.random() < 0.5) this.enemies.push(new FireSpirit(this));
+                // if (Math.random() < 0.3) this.enemies.push(new Golem(this));
+                if (Math.random() < 0.5) this.enemies.push(new lava_shark(this));
+                else if (Math.random() > 0.5) this.enemies.push(new Devil(this));
+                if (Math.random() < 0.3) this.enemies.push(new FireBall(this));
             }
 
             if(this.world === "sky") {
@@ -241,31 +293,53 @@ window.addEventListener('load', function(){
             console.log(this.enemies);
         }
 
+        continueGame(){
+            this.gameOver = false;
+            this.win = false;
+
+            this.enemies = [];
+            this.coins = [];
+
+            this.enemyTimer = 0;
+            this.coinTimer = 0;
+        }
+
+        restartGame(){
+            this.gameOver = false;
+            this.win = false;
+
+            // Reset player
+            this.player = new Player(this);
+
+            // Reset game values
+            this.lives = 5;
+            this.time = 0;
+
+            // Reset quest
+            this.questItemsCollected = 0;
+            this.questComplete = false;
+
+            // Clear everything
+            this.enemies = [];
+            this.coins = [];
+            this.questItems = [];
+            this.collisions = [];
+
+            // Reset timers
+            this.enemyTimer = 0;
+            this.coinTimer = 0;
+            this.questItemTimer = 0;
+
+            this.gameStarted = false;
+        }        
+
 
         addCoin(){
             this.coinCount++;
             localStorage.setItem("coins", this.coinCount);
         }
 
-        drawFloor(context){
-            if (this.world === "sky" || this.world === "forest" || this.world === "cave") return;
 
-            context.save();
-
-            if (this.world === "volcano") {
-                context.fillStyle = "#5a0b0b"; // dark red
-            } 
-
-
-            context.fillRect(
-                0,
-                this.height - this.floorHeight,
-                this.width,
-                this.floorHeight
-            );
-
-            context.restore();
-        }
     }
 
     const game = new Game(canvas.width, canvas.height, selectedWorld);

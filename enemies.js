@@ -106,6 +106,64 @@ export class Tulip extends Enemy {
     }
 }
 
+export class Wolf extends Enemy {
+    constructor(game){
+        super();
+        this.game = game;
+        this.width = 192;
+        this.height = 120;
+        this.x = this.game.width + this.width; // fully off-screen right
+        this.y = this.game.height - this.height - this.game.groundMargin;
+        this.image = document.getElementById('wolf');
+        this.speedX = 4;
+        this.speedY = 0;    
+        this.maxFrame = 8;
+
+        this.hitbox = {
+            offsetX: 20,
+            offsetY: 35,
+            width: this.width - 40,
+            height: this.height -35
+        };
+
+        // Warning phase
+        this.warningDuration = 1000; // 1 second
+        this.warningTimer = 0;
+        this.isFalling = false;
+
+        this.warningImage = document.getElementById('warning');
+
+    }
+    update(deltaTime){
+        if(!this.isFalling){
+            // Warning phase
+            this.warningTimer += deltaTime;
+            if(this.warningTimer >= this.warningDuration){
+                this.isFalling = true; // branch starts falling
+            }
+        } else {
+            // Falling phase
+            super.update(deltaTime);
+        }
+    }
+    draw(context){
+        if(!this.isFalling){
+            // Draw warning at top of screen
+            const warningSize = 70; // size in px, square
+            context.drawImage(
+                this.warningImage,
+                this.game.width - warningSize - 20, // right side with padding
+                this.y + this.height / 2 - warningSize / 2,
+                warningSize,                           // width
+                warningSize                            // height
+            );
+        } else {
+            super.draw(context);
+        }
+    }
+}
+
+
 export class FallingBranch extends Enemy {
     constructor(game){
         super();
@@ -294,6 +352,50 @@ export class Spidercrawler extends Enemy {
     }
 }
 
+export class ClimbingSpider extends Enemy {
+    constructor(game){
+        super();
+        this.game = game;
+        this.width = 120;
+        this.height = 144;
+        this.x = this.game.width;
+        this.y = Math.random() * this.game.height * 0.5;
+
+
+        this.speedX = 1.6;
+        this.speedY = Math.random() > 0.5 ? 1 : -1;
+
+        this.maxFrame = 5;
+        this.image = document.getElementById('spider_big');
+
+
+        this.hitbox = {
+            offsetX: 10,
+            offsetY: 10,
+            width: this.width - 20,
+            height: this.height - 20
+        };
+    }    
+    update(deltaTime){
+        super.update(deltaTime);
+        if(this.y > this.game.height - this.height - this.game.groundMargin){
+            this.speedY *= -1;
+        }
+
+        if(this.y < -this.height + this.height){
+            this.speedY *= -1;
+        }
+
+    }    
+    draw(context){
+        super.draw(context);
+        context.beginPath();
+        context.moveTo(this.x + this.width/2,0);
+        context.lineTo(this.x + this.width/2, this.y + 50);
+        context.stroke();
+    }
+}
+
 ///////////////////////////////////////////
 // VOLCANO //
 //////////////////////////////////////////
@@ -317,6 +419,94 @@ export class FireSpirit extends FlyingEnemy {
     }    
 }
 
+export class Devil extends FlyingEnemy {
+    constructor(game){
+        super(game);
+        this.width = 99.6;
+        this.height = 64;
+        this.speedX = 2;
+        this.speedY = 0;
+        this.maxFrame = 4;
+        this.image = document.getElementById('devil');
+
+        this.hitbox = {
+            offsetX: 20,
+            offsetY: 0,
+            width: this.width - 40,
+            height: this.height - 0
+        };
+    }    
+}
+
+export class FireBall extends Enemy {
+    constructor(game){
+        super();
+        this.game = game;
+        this.width = 60;
+        this.height = 92;
+
+        // Spawn above player
+        // this.x = this.game.player.x + this.game.player.width / 2 - this.width / 2;
+        //Math.random() * this.game.height * 0.5
+        this.x = Math.random() * this.game.width + 100;
+        this.y = 0 - this.height;
+
+        this.image = document.getElementById('fire_ball');
+        this.speedX = 0;
+        this.speedY = 3;    
+        this.maxFrame = 3;
+
+        // Warning phase
+        this.warningDuration = 1000; // 1 second
+        this.warningTimer = 0;
+        this.isFalling = false;
+
+        this.hitbox = {
+            offsetX: 0,
+            offsetY: 0,
+            width: this.width,
+            height: this.height
+        };
+
+        // Get the warning image
+        this.warningImage = document.getElementById('warning');
+    }
+
+    update(deltaTime){
+        if(!this.isFalling){
+            // Warning phase
+            this.warningTimer += deltaTime;
+            if(this.warningTimer >= this.warningDuration){
+                this.isFalling = true; // branch starts falling
+            }
+        } else {
+            // Falling phase
+            super.update(deltaTime);
+
+            const ground = this.game.height - this.height - this.game.groundMargin;
+            if(this.y > ground){
+                this.markForDeletion = true;
+            }
+        }
+    }
+
+    draw(context){
+        if(!this.isFalling){
+            // Draw warning at top of screen
+            const warningSize = 70; // size in px, square
+            context.drawImage(
+                this.warningImage,
+                this.x + this.width/2 - warningSize/2, // center above branch
+                50,                                   // fixed y
+                warningSize,                           // width
+                warningSize                            // height
+            );
+        } else {
+            super.draw(context);
+        }
+    }
+}
+
 export class Golem extends Enemy {
     constructor(game){
         super(game);
@@ -336,6 +526,66 @@ export class Golem extends Enemy {
             width: this.width - 30,
             height: this.height -30
         };
+    }
+}
+
+export class lava_shark extends Enemy {
+    constructor(game){
+        super(game);
+        this.game = game;
+        this.width = 176.63;
+        this.height = 70;
+        this.x = this.game.width;
+        this.y = this.game.height - this.height - this.game.groundMargin;
+        this.image = document.getElementById('lava_shark');
+        this.speedY = 0;    
+        this.maxFrame = 7;
+
+        this.baseSpeed = 3;
+        this.jumpSpeed = 4;
+        this.speedX = this.baseSpeed;
+
+        // jump physics
+        this.vy = 0;
+        this.gravity = 2000;
+        this.jumpForce = 900;
+
+        // jump timing
+        this.jumpTimer = 0;
+        this.jumpInterval = 500 + Math.random() * 1000;
+
+        this.hitbox = {
+            offsetX: 10,
+            offsetY: 20,
+            width: this.width - 10,
+            height: this.height - 20
+        };
+    }
+    update(deltaTime){
+        super.update(deltaTime);
+        const dt = deltaTime * 0.001;
+
+        // gravity
+        this.y += this.vy * dt;
+        this.vy += this.gravity * dt;
+
+        const ground = this.game.height - this.height - this.game.groundMargin + 20;
+
+        if(this.y >= ground){
+            this.y = ground;
+            this.vy = 0;
+
+            // reset speed when landing
+            this.speedX = this.baseSpeed;
+
+            this.jumpTimer += deltaTime;
+
+            if(this.jumpTimer > this.jumpInterval){
+                this.vy = -this.jumpForce;
+                this.speedX = this.jumpSpeed;
+                this.jumpTimer = 0;
+            }
+        }
     }
 }
 
@@ -438,46 +688,3 @@ export class Dragon extends FlyingEnemy {
 }
 
 
-export class ClimbingSpider extends Enemy {
-    constructor(game){
-        super();
-        this.game = game;
-        this.width = 120;
-        this.height = 144;
-        this.x = this.game.width;
-        this.y = Math.random() * this.game.height * 0.5;
-
-
-        this.speedX = 1.6;
-        this.speedY = Math.random() > 0.5 ? 1 : -1;
-
-        this.maxFrame = 5;
-        this.image = document.getElementById('spider_big');
-
-
-        this.hitbox = {
-            offsetX: 10,
-            offsetY: 10,
-            width: this.width - 20,
-            height: this.height - 20
-        };
-    }    
-    update(deltaTime){
-        super.update(deltaTime);
-        if(this.y > this.game.height - this.height - this.game.groundMargin){
-            this.speedY *= -1;
-        }
-
-        if(this.y < -this.height + this.height){
-            this.speedY *= -1;
-        }
-
-    }    
-    draw(context){
-        super.draw(context);
-        context.beginPath();
-        context.moveTo(this.x + this.width/2,0);
-        context.lineTo(this.x + this.width/2, this.y + 50);
-        context.stroke();
-    }
-}

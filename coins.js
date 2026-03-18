@@ -5,7 +5,15 @@ export class Coin {
         this.height = 50;
 
         this.x = this.game.width + Math.random() * 200;
-        this.y = this.game.height - this.height - this.game.groundMargin - Math.random() * 500;
+        // this.y = this.game.height - this.height - this.game.groundMargin - Math.random() * 500;
+        if (this.game.world === "forest") {
+            // Ground only
+            this.y = this.game.height - this.height - this.game.groundMargin - 50;
+        } else {
+            // Random height like coins
+            this.y = this.game.height - this.height - this.game.groundMargin - Math.random() * 500;
+        }
+
 
         this.speedX = this.game.speed * .8;
         this.markForDeletion = false;

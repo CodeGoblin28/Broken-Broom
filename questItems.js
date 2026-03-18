@@ -8,7 +8,17 @@ class Objective {
 
         // Spawn position
         this.x = x !== undefined ? x : this.game.width + Math.random() * this.game.width * 0.5;
-        this.y = y !== undefined ? y : Math.random() * (this.game.height - this.height - this.game.groundMargin);
+        if (y !== undefined) {
+            this.y = y;
+        } else {
+            if (this.game.world === "forest") {
+                // Ground only
+                this.y = this.game.height - this.height - this.game.groundMargin - 50;
+            } else {
+                // Random height like coins
+                this.y = this.game.height - this.height - this.game.groundMargin - Math.random() * 500;
+            }
+        }
 
         // Image
         this.image = document.getElementById(imageId);
@@ -57,21 +67,18 @@ class Objective {
 
 export class Stick extends Objective {
     constructor(game){
-        const fixedY = game.height - 150 - game.groundMargin;
-        super(game, 'stick', undefined, fixedY, 60, 60, 1); // imageId='bone', speedMultiplier=1
+        super(game, 'stick');
     }
 }
 
 export class Web extends Objective {
     constructor(game){
-        const fixedY = game.height - 150 - game.groundMargin;
-        super(game, 'web', undefined, fixedY, 60, 60, 1); // imageId='bone', speedMultiplier=1
+        super(game, 'web');
     }
 }
 
 export class Ruby extends Objective {
     constructor(game){
-        const fixedY = game.height - 150 - game.groundMargin;
-        super(game, 'ruby', undefined, fixedY, 60, 60, 1); // imageId='bone', speedMultiplier=1
+        super(game, 'ruby');
     }
 }
