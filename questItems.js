@@ -82,3 +82,9 @@ export class Ruby extends Objective {
         super(game, 'ruby');
     }
 }
+
+export class Scale extends Objective {
+    constructor(game){
+        super(game, 'scale');
+    }
+}

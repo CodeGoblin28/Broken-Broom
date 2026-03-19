@@ -81,6 +81,7 @@ export class Player{
         this.currentState.enter();
 
         this.dead = false;
+        this.shield = this.game.startWithShield ? 1 : 0;
 
         this.lavaBounceForce = 900;
         this.invulnerableTimer = 0;
@@ -226,6 +227,14 @@ export class Player{
     loseLife(playPlayerEffect = false){
         if (this.dead) return;
 
+        // shield blocks one hit
+        if (this.shield > 0) {
+            this.shield--;
+            this.game.powerUpMessage = "Shield Blocked!";
+            this.game.powerUpMessageTimer = 1000;
+            return;
+        }
+
         this.game.lives--;
 
         if (playPlayerEffect) {
@@ -242,7 +251,6 @@ export class Player{
             this.game.lives = 0;
             this.game.gameOver = true;
 
-            // Only play death effect if it wasn't already played
             if (!playPlayerEffect) {
                 this.game.collisions.push(
                     new CollisionAnimation(

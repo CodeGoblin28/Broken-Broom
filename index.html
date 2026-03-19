@@ -180,8 +180,8 @@
     <div class="settings-box">
         <h2>SETTINGS</h2>
 
-        <button>RESET COINS</button>
-        <button>RESET PROGRESSION</button>
+        <button id="resetCoinsBtn">RESET COINS</button>
+        <button id="resetProgressBtn">RESET PROGRESSION</button>
         <button>DEV MODE</button>
         <button id="backBtn">BACK</button>
     </div>
@@ -283,7 +283,6 @@ const skins = [
 
 const upgrades = [
 
-{ id:"upgrade_luck", name:"Luck UP", image:"asset/shop/luck.png" },
 { id:"healthUp", name:"Health UP", image:"asset/shop/healthUp.png" },
 { id:"upgrade_shield", name:"Shield", image:"asset/shop/shield.png" }
 
@@ -358,6 +357,56 @@ upgradeContainer.appendChild(div);
 });
 
 }
+
+
+const resetCoinsBtn = document.getElementById("resetCoinsBtn");
+const resetProgressBtn = document.getElementById("resetProgressBtn");
+
+/* RESET COINS */
+
+resetCoinsBtn.addEventListener("click", () => {
+    const confirmed = confirm("Are you sure you want to reset all coins?");
+    if (!confirmed) return;
+
+    localStorage.setItem("coins", 0);
+    alert("Coins have been reset.");
+});
+
+/* RESET PROGRESSION */
+
+resetProgressBtn.addEventListener("click", () => {
+    const confirmed = confirm(
+        "Are you sure you want to reset progression?\n\n" +
+        "This will:\n" +
+        "- lock all worlds except Forest\n" +
+        "- remove bought skins\n" +
+        "- remove bought upgrades\n" +
+        "- equip the default skin again"
+    );
+
+    if (!confirmed) return;
+
+    // Reset world unlock progress
+    localStorage.setItem("highestUnlockedWorld", "forest");
+
+    // Reset owned skins
+    localStorage.removeItem("blue");
+    localStorage.removeItem("red");
+    localStorage.removeItem("pink");
+
+    // Reset upgrades
+    localStorage.removeItem("healthUp");
+    localStorage.removeItem("upgrade_shield");
+
+    // Reset any saved active upgrade states if you use them
+    localStorage.removeItem("hasShield");
+    localStorage.removeItem("maxLives");
+
+    // Reset equipped skin back to default
+    localStorage.setItem("equippedSkin", "default");
+
+    alert("Progression has been reset.");
+});
 </script>
 
 </body>

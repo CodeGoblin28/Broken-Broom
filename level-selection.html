@@ -14,7 +14,6 @@
         position: relative;
     }
 
-    /* Dark overlay */
     body::before {
         content: "";
         position: absolute;
@@ -30,37 +29,65 @@
         justify-content: center;
         align-items: center;
         gap: 60px;
-        z-index: 2; /* Above overlay */
+        z-index: 2;
     }
 
     .world {
+        position: relative;
         cursor: pointer;
         transition: transform 0.2s ease;
     }
 
     .world img {
         width: 200px;
+        display: block;
+        transition: 0.2s ease;
     }
 
     .world:hover {
         transform: scale(1.1);
     }
 
+    .world.locked {
+        cursor: not-allowed;
+    }
+
+    .world.locked:hover {
+        transform: none;
+    }
+
+    .world.locked img {
+        filter: grayscale(100%) brightness(0.35);
+    }
+
+    .lock-overlay {
+        position: absolute;
+        inset: 0;
+        display: none;
+        justify-content: center;
+        align-items: center;
+        font-size: 64px;
+        color: white;
+        text-shadow: 0 0 12px black;
+        pointer-events: none;
+    }
+
+    .world.locked .lock-overlay {
+        display: flex;
+    }
+
     .back-button {
         position: absolute;
         top: 20px;
         left: 20px;
-        z-index: 3; /* Above overlay */
-
+        z-index: 3;
         padding: 10px 20px;
         font-size: 18px;
         font-weight: bold;
-
         color: white;
         background: rgba(0, 0, 0, 0.6);
         border: 2px solid white;
         border-radius: 8px;
-
         cursor: pointer;
         transition: 0.2s ease;
     }
@@ -70,7 +97,7 @@
         color: black;
         transform: scale(1.05);
     }
-    </style>
+</style>
 </head>
 
 <body>
@@ -80,25 +107,28 @@
 <div class="worlds">
     <div class="world" data-world="forest">
         <img src="asset/worlds/Forest.png" alt="Forest">
+        <div class="lock-overlay">🔒</div>
     </div>
 
     <div class="world" data-world="cave">
         <img src="asset/worlds/Cave.png" alt="Cave">
+        <div class="lock-overlay">🔒</div>
     </div>
 
     <div class="world" data-world="volcano">
         <img src="asset/worlds/Volcano.png" alt="Volcano">
+        <div class="lock-overlay">🔒</div>
     </div>
 
     <div class="world" data-world="sky">
         <img src="asset/worlds/Sky.png" alt="Sky">
+        <div class="lock-overlay">🔒</div>
     </div>
 </div>
 
 <script>
     const body = document.body;
 
-    // Background paths
     const backgrounds = {
         forest: "asset/Background/Forest/Forest.png",
         cave: "asset/Background/Cave/Cave.png",
@@ -106,12 +136,20 @@
         sky: "asset/Background/Sky/Sky.png"
     };
 
-    // Back button
+    const worldOrder = ["forest", "cave", "volcano", "sky"];
+
+    // default if player has no progress yet
+    if (!localStorage.getItem("highestUnlockedWorld")) {
+        localStorage.setItem("highestUnlockedWorld", "forest");
+    }
+
+    const highestUnlockedWorld = localStorage.getItem("highestUnlockedWorld");
+    const highestIndex = worldOrder.indexOf(highestUnlockedWorld);
+
     document.querySelector('.back-button').addEventListener('click', () => {
         window.location.href = "index.html";
     });
 
-    // ✅ Default background = Forest
     body.style.backgroundImage = `url(${backgrounds.forest})`;
     body.style.backgroundRepeat = "no-repeat";
     body.style.backgroundSize = "cover";
@@ -120,16 +158,25 @@
     const worlds = document.querySelectorAll('.world');
 
     worlds.forEach(world => {
+        const selectedWorld = world.dataset.world;
+        const worldIndex = worldOrder.indexOf(selectedWorld);
+        const isUnlocked = worldIndex <= highestIndex;
 
-        // 🔥 Change background on hover
+        if (!isUnlocked) {
+            world.classList.add("locked");
+        }
+
         world.addEventListener('mouseenter', () => {
-            const selectedWorld = world.dataset.world;
+            if (!isUnlocked) return;
             body.style.backgroundImage = `url(${backgrounds[selectedWorld]})`;
         });
 
-        // 🎮 Click → go to game
         world.addEventListener('click', () => {
-            const selectedWorld = world.dataset.world;
+            if (!isUnlocked) {
+                alert(`This world is locked. Complete ${worldOrder[worldIndex - 1]} first.`);
+                return;
+            }
+
             window.location.href = `game.html?world=${selectedWorld}`;
         });
     });

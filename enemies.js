@@ -1,3 +1,5 @@
+import { CollisionAnimation } from "./collisionAnimation.js";
+
 class Enemy {
     constructor(){
         this.frameX = 0;
@@ -389,10 +391,207 @@ export class ClimbingSpider extends Enemy {
     }    
     draw(context){
         super.draw(context);
+        context.save();
         context.beginPath();
         context.moveTo(this.x + this.width/2,0);
         context.lineTo(this.x + this.width/2, this.y + 50);
+        context.strokeStyle = "black";
         context.stroke();
+        context.restore();
+    }
+}
+
+export class Stalactite extends Enemy {
+    constructor(game){
+        super();
+        this.game = game;
+        this.width = 60;
+        this.height = 167;
+
+        // Spawn above player
+        this.x = this.game.player.x + this.game.player.width / 2 - this.width / 2;
+        this.y = 0 - this.height;
+
+        this.image = document.getElementById('stalactite');
+        this.speedX = 0;
+        this.speedY = 5;    
+        this.maxFrame = 0;
+
+        // Warning phase
+        this.warningDuration = 1000; // 1 second
+        this.warningTimer = 0;
+        this.isFalling = false;
+
+        this.hitbox = {
+            offsetX: 0,
+            offsetY: 0,
+            width: this.width,
+            height: this.height - 30
+        };
+
+        // Get the warning image
+        this.warningImage = document.getElementById('warning');
+    }
+
+    update(deltaTime){
+        if(!this.isFalling){
+            // Warning phase
+            this.warningTimer += deltaTime;
+            if(this.warningTimer >= this.warningDuration){
+                this.isFalling = true; // branch starts falling
+            }
+        } else {
+            // Falling phase
+            super.update(deltaTime);
+
+            const ground = this.game.height - this.height - this.game.groundMargin;
+            if(this.y > ground){
+                this.y = ground;
+
+                // Ground impact animation
+                this.game.collisions.push(
+                    new CollisionAnimation(
+                        this.game,
+                        this.x + this.width * 0.5,
+                        this.y + this.height
+                    )
+                );
+
+                this.markForDeletion = true;
+            }
+        }
+    }
+
+    draw(context){
+        if(!this.isFalling){
+            // Draw warning at top of screen
+            const warningSize = 70; // size in px, square
+            context.drawImage(
+                this.warningImage,
+                this.x + this.width/2 - warningSize/2, // center above branch
+                50,                                   // fixed y
+                warningSize,                           // width
+                warningSize                            // height
+            );
+        } else {
+            super.draw(context);
+        }
+    }
+}
+
+export class HangingStalactite extends Enemy {
+    constructor(game){
+        super(game);
+        this.game = game;
+        this.width = 60;
+        this.height = 167;
+        this.x = this.game.width;
+        this.y = 0 - 50;
+        this.image = document.getElementById('stalactite');
+        this.speedX = 1.6;
+        this.speedY = 0;    
+        this.maxFrame = 0;
+
+        this.hitbox = {
+            offsetX: 0,
+            offsetY: 0,
+            width: this.width,
+            height: this.height - 30
+        };
+    }
+}
+
+export class Boulder extends Enemy {
+    constructor(game){
+        super();
+        this.game = game;
+        this.width = 168;
+        this.height = 169;
+        this.x = this.game.width + this.width; // fully off-screen right
+        this.y = this.game.height - this.height - this.game.groundMargin;
+        this.image = document.getElementById('boulder');
+        this.speedX = 4;
+        this.speedY = 0;    
+        this.maxFrame = 0;
+
+        this.rotation = 0;
+        this.rotationSpeed = -0.05; // tweak this (0.05–0.2 feels good)
+
+        this.hitbox = {
+            offsetX: 5,
+            offsetY: 5,
+            width: this.width - 10,
+            height: this.height -10
+        };
+
+        // Warning phase
+        this.warningDuration = 1000; // 1 second
+        this.warningTimer = 0;
+        this.isFalling = false;
+
+        this.warningImage = document.getElementById('warning');
+
+    }
+    update(deltaTime){
+        if(!this.isFalling){
+            // Warning phase
+            this.warningTimer += deltaTime;
+            if(this.warningTimer >= this.warningDuration){
+                this.isFalling = true; // branch starts falling
+            }
+        } else {
+            super.update(deltaTime);
+            this.rotation += this.rotationSpeed;
+        }
+    }
+    draw(context){
+        if(!this.isFalling){
+            const warningSize = 70;
+            context.drawImage(
+                this.warningImage,
+                this.game.width - warningSize - 20,
+                this.y + this.height / 2 - warningSize / 2,
+                warningSize,
+                warningSize
+            );
+        } else {
+            context.save();
+
+            // Move to center of boulder
+            context.translate(
+                this.x + this.width / 2,
+                this.y + this.height / 2
+            );
+
+            // Rotate
+            context.rotate(this.rotation);
+
+            // Draw centered
+            context.drawImage(
+                this.image,
+                this.frameX * this.width,
+                this.frameY * this.height,
+                this.width,
+                this.height,
+                -this.width / 2,
+                -this.height / 2,
+                this.width,
+                this.height
+            );
+
+            context.restore();
+
+            // Debug hitbox (optional)
+            if (this.game.debug){
+                context.strokeStyle = "yellow";
+                context.strokeRect(
+                    this.x + this.hitbox.offsetX,
+                    this.y + this.hitbox.offsetY,
+                    this.hitbox.width,
+                    this.hitbox.height
+                );
+            }
+        }
     }
 }
 
@@ -687,4 +886,55 @@ export class Dragon extends FlyingEnemy {
     }
 }
 
+export class Tornado extends FlyingEnemy {
+    constructor(game){
+        super(game);
+        this.width = 200;
+        this.height = 200;
+        this.speedX = 2;
+        this.speedY = 0;
+        this.maxFrame = 14;
+        this.image = document.getElementById('tornado');
+        this.x = this.game.width;
+        this.y = this.game.height - this.height;
+
+        this.hitbox = {
+            offsetX: 30,
+            offsetY: 40,
+            width: this.width - 100,
+            height: this.height - 40
+        };
+    }    
+    update(deltaTime){
+        super.update(deltaTime);
+
+        const player = this.game.player;
+
+        // Center positions
+        const tornadoCenterX = this.x + this.width / 2;
+        const tornadoCenterY = this.y + this.height / 2;
+
+        const playerCenterX = player.x + player.width / 2;
+        const playerCenterY = player.y + player.height / 2;
+
+        // Distance
+        const dx = tornadoCenterX - playerCenterX;
+        const dy = tornadoCenterY - playerCenterY;
+        const distance = Math.sqrt(dx * dx + dy * dy);
+
+        const pullRadius = 500; // range of effect
+
+        if(distance < pullRadius){
+            const strength = (pullRadius - distance) / pullRadius; // 0 → 1
+
+            // Normalize direction
+            const forceX = dx / distance;
+            const forceY = dy / distance;
+
+            // Apply pull (tweak multiplier for strength)
+            player.x += forceX * strength * 3;
+            player.y += forceY * strength * 3;
+        }
+    }
+}
 

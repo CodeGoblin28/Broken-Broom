@@ -38,17 +38,53 @@ export class UI {
             );
         }
 
-        //timer
-        if(this.game.world == 'sky'){
-            context.font = this.fontSize * .8 + 'px ' + this.fontFamily;   
-            context.fillText("Time: " + (this.game.time * 0.001).toFixed(1), 20, 85 );  
-        }
-
-
+        // timer
+        // if(this.game.world == 'sky'){
+        //     context.font = this.fontSize * .8 + 'px ' + this.fontFamily;   
+        //     context.fillText("Time: " + (this.game.time * 0.001).toFixed(1), 20, 85 );  
+        // }
 
         // Lives
-        for( let i = 0; i < this.game.lives; i++){
+        for(let i = 0; i < this.game.lives; i++){
             context.drawImage(this.livesImage, 30 * i + 20, 100, 25, 25);
+        }
+
+        // Event announcement
+        if(this.game.eventAnnouncementTimer > 0 && this.game.eventAnnouncement){
+            context.textAlign = 'center';
+            context.font = this.fontSize * 1.2 + 'px ' + this.fontFamily;
+            context.fillStyle = 'yellow';
+            context.fillText(
+                this.game.eventAnnouncement,
+                this.game.width * 0.5,
+                60
+            );
+
+            // reset UI color for next texts
+            context.fillStyle = this.color;
+            context.textAlign = 'left';
+            context.font = this.fontSize + "px " + this.fontFamily;
+        }
+
+        // Shield count
+        if (this.game.player.shield > 0) {
+            context.fillText("Shield: " + this.game.player.shield, 20, 160);
+        }
+
+        // Power-up message
+        if (this.game.powerUpMessageTimer > 0 && this.game.powerUpMessage) {
+            context.textAlign = 'center';
+            context.font = this.fontSize + 'px ' + this.fontFamily;
+            context.fillStyle = 'cyan';
+            context.fillText(
+                this.game.powerUpMessage,
+                this.game.width * 0.5,
+                120
+            );
+
+            context.fillStyle = this.color;
+            context.textAlign = 'left';
+            context.font = this.fontSize + "px " + this.fontFamily;
         }
 
         // Draw game over screen
@@ -57,16 +93,20 @@ export class UI {
             context.font = this.fontSize * 1.5 + 'px ' + this.fontFamily;
             if(this.game.questItemsCollected == this.game.questItemAmount){
                 context.fillText("Quest Items Has Been Collected!!!", this.game.width * .5 , this.game.height * .3 ); 
-                context.font = this.fontSize * 1 + 'px ' + this.fontFamily;                
-                context.fillText("Press ESC to Return!!! Or SPACE to Continue!!!", this.game.width * .5 , this.game.height * .3 + 40 ); 
+                context.font = this.fontSize * 1 + 'px ' + this.fontFamily;    
+                if(this.game.world !== 'sky'){
+                    context.fillText("Press ESC to Return!!! Next World Has been Unlocked", this.game.width * .5 , this.game.height * .3 + 40 ); 
+                } else {
+                    context.fillText("Press ESC to Return!!! Endless has been unlocked", this.game.width * .5 , this.game.height * .3 + 40 ); 
+                }
             } else {
                 context.font = this.fontSize * 1.5 + 'px ' + this.fontFamily;
                 context.fillText("Opps!!! You Died", this.game.width * .5 , this.game.height * .3 ); 
                 context.font = this.fontSize * 1 + 'px ' + this.fontFamily;                
                 context.fillText("Press ESC to Return!!! OR SPACE to Reset!!!", this.game.width * .5 , this.game.height * .3 + 40 );
-                if(this.game.world == 'sky'){
-                    context.fillText("Time Survived: " + (this.game.time * 0.001).toFixed(1), this.game.width * .5 , this.game.height * .3 + 75);  
-                }                                 
+                // if(this.game.world == 'sky'){
+                //     context.fillText("Time Survived: " + (this.game.time * 0.001).toFixed(1), this.game.width * .5 , this.game.height * .3 + 75);  
+                // }                                 
             }
         }
 
