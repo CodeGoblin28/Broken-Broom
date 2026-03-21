@@ -3,7 +3,7 @@ class Objective {
         this.game = game;
         this.width = width;
         this.height = height;
-        this.speedMultiplier = 0.8;
+        this.speedMultiplier = speedMultiplier;
         this.markForDeletion = false;
 
         // Spawn position
@@ -16,7 +16,7 @@ class Objective {
                 this.y = this.game.height - this.height - this.game.groundMargin - 50;
             } else {
                 // Random height like coins
-                this.y = this.game.height - this.height - this.game.groundMargin - Math.random() * 500;
+                this.y = this.game.height - this.height - this.game.groundMargin - 50 - Math.random() * 500;
             }
         }
 

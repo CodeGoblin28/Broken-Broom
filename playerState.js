@@ -112,12 +112,14 @@ export class Flying extends State{
             this.player.setState(states.RUNNING);
         }
 
+        // const flySpeed = 500 * this.player.game.difficultyMultiplier;
+
         // Optional: allow vertical control
         if (input.includes('ArrowUp') || input.includes('w')) {
-            this.player.vy = -500;
+            this.player.vy = -500; 
         } 
         else if (input.includes('ArrowDown') || input.includes('s')) {
-            this.player.vy = 500;
+            this.player.vy = 500;  // down
         } 
         else {
             if (isSky) {

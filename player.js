@@ -39,7 +39,8 @@ export class Player{
         this.vy = 0;
 
         this.speed = 0;
-        this.maxSpeed = 300;
+        this.baseMaxSpeed = 300;
+        this.maxSpeed = this.baseMaxSpeed;
         this.gravity = 2000;
 
         this.jumpForce = 1000;
@@ -89,6 +90,9 @@ export class Player{
     }
     update(input, deltaTime){
         if (this.dead) return;
+
+        // scale player speed with difficulty
+        this.maxSpeed = this.baseMaxSpeed * (1 + (this.game.difficultyMultiplier - 1) * 0.6);
 
         // Force flying state in sky/volcano world
         if (this.game.world === "sky" || this.game.world === "volcano" ) {

@@ -24,7 +24,17 @@ window.addEventListener('load', function(){
             this.width = width;
             this.height = height;
             this.groundMargin = 50;
-            this.speed = 0;
+
+            // =========================
+            // Speed Difficulty
+            // =========================            
+            this.baseSpeed = 2;
+            this.speed = this.baseSpeed;
+
+            this.difficultyMultiplier = 1;
+            this.difficultyIncreaseRate = 0.00001; // tweak this
+            this.maxDifficultyMultiplier = 3;
+
 
             this.playerStillTimer = 0;
             this.playerStillThreshold = 500;
@@ -56,10 +66,13 @@ window.addEventListener('load', function(){
             this.powerUpMessage = "";
             this.powerUpMessageTimer = 0;
 
+            // =========================
+            // Quest Item
+            // =========================   
             this.questItems = [];
             this.questItemTimer = 0;
             this.questItemInterval = 10000;
-            this.questItemAmount = 2;
+            this.questItemAmount = 5;
             this.questComplete = false;
 
             this.questItemsCollected = 0;
@@ -126,6 +139,8 @@ window.addEventListener('load', function(){
             this.eventAnnouncementTimer = 0;
             this.eventAnnouncementDuration = 4000;
 
+
+
         }
 
         update(deltaTime){
@@ -147,7 +162,7 @@ window.addEventListener('load', function(){
                 this.restartPressed = false;
             }
 
-            if (this.gameStarted && !game.gameOver) this.time += deltaTime;
+            if (this.gameStarted && !game.gameOver) this.time += deltaTime; 
 
             const movementKeys = ['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','a','d','w','s'];
 
@@ -163,7 +178,18 @@ window.addEventListener('load', function(){
                 this.unlockNextWorld();
             }
 
-            this.speed = this.gameStarted ? 2 : 0;
+            this.baseSpeed = this.gameStarted ? 2 : 0;
+
+            // Increase difficulty gradually
+            this.difficultyMultiplier += deltaTime * this.difficultyIncreaseRate;
+
+            // Clamp it so it doesn't go infinite
+            if (this.difficultyMultiplier > this.maxDifficultyMultiplier) {
+                this.difficultyMultiplier = this.maxDifficultyMultiplier;
+            }
+
+            // Apply to game speed
+            this.speed = this.baseSpeed * this.difficultyMultiplier;      
 
             // Coin spawning
             if(!game.gameOver){
@@ -403,6 +429,7 @@ window.addEventListener('load', function(){
                 this.enemies.push(new FireBall(this));
                 if (Math.random() > 0.4) this.enemies.push(new FireBall(this));
                 if (Math.random() < 0.4) this.enemies.push(new FireBall(this));
+                if (Math.random() < 0.2) this.enemies.push(new FireBall(this));
             }
 
             else if (this.world === "sky") {

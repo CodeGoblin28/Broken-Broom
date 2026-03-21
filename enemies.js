@@ -17,7 +17,7 @@ class Enemy {
         };
     }
     update(deltaTime){
-        this.x -= this.speedX;
+        this.x -= this.speedX * this.game.speed;
         this.y += this.speedY;
         if(this.frameTimer > this.frameInterval){
             this.frameTimer = 0;
@@ -65,7 +65,7 @@ export class Fly extends FlyingEnemy {
         super(game);
         this.width = 60;
         this.height = 44;
-        this.speedX = Math.random() + 1;
+        this.speedX = Math.random() * 0.5 + 0.5;
         this.speedY = 0;
         this.maxFrame = 5;
         this.image = document.getElementById('enemy_fly');
@@ -95,7 +95,7 @@ export class Tulip extends Enemy {
         this.x = this.game.width;
         this.y = this.game.height - this.height - this.game.groundMargin;
         this.image = document.getElementById('enemy_plant');
-        this.speedX = 1.6;
+        this.speedX = 0.8;
         this.speedY = 0;    
         this.maxFrame = 10;
 
@@ -117,7 +117,7 @@ export class Wolf extends Enemy {
         this.x = this.game.width + this.width; // fully off-screen right
         this.y = this.game.height - this.height - this.game.groundMargin;
         this.image = document.getElementById('wolf');
-        this.speedX = 4;
+        this.speedX = 2;
         this.speedY = 0;    
         this.maxFrame = 8;
 
@@ -246,8 +246,8 @@ export class Slime extends Enemy {
 
         this.image = document.getElementById('slime');
 
-        this.baseSpeed = 1.6;
-        this.jumpSpeed = 4;
+        this.baseSpeed = 0.8;
+        this.jumpSpeed = 2;
         this.speedX = this.baseSpeed;
 
         this.speedY = 0;
@@ -255,7 +255,7 @@ export class Slime extends Enemy {
 
         // jump physics
         this.vy = 0;
-        this.gravity = 2000;
+        this.gravity = 2500;
         this.jumpForce = 900;
 
         // jump timing
@@ -309,7 +309,7 @@ export class Ghost extends FlyingEnemy {
         super(game);
         this.width = 72;
         this.height = 104;
-        this.speedX = 1.5;
+        this.speedX = 0.75;
         this.speedY = 0;
         this.maxFrame = 3;
         this.image = document.getElementById('ghost');
@@ -341,7 +341,7 @@ export class Spidercrawler extends Enemy {
         this.x = this.game.width;
         this.y = this.game.height - this.height - this.game.groundMargin;
         this.image = document.getElementById('spidercrawler');
-        this.speedX = 2;
+        this.speedX = 1.5;
         this.speedY = 0;    
         this.maxFrame = 4;
 
@@ -364,7 +364,7 @@ export class ClimbingSpider extends Enemy {
         this.y = Math.random() * this.game.height * 0.5;
 
 
-        this.speedX = 1.6;
+        this.speedX = 0.8;
         this.speedY = Math.random() > 0.5 ? 1 : -1;
 
         this.maxFrame = 5;
@@ -488,7 +488,7 @@ export class HangingStalactite extends Enemy {
         this.x = this.game.width;
         this.y = 0 - 50;
         this.image = document.getElementById('stalactite');
-        this.speedX = 1.6;
+        this.speedX = 0.8;
         this.speedY = 0;    
         this.maxFrame = 0;
 
@@ -510,12 +510,12 @@ export class Boulder extends Enemy {
         this.x = this.game.width + this.width; // fully off-screen right
         this.y = this.game.height - this.height - this.game.groundMargin;
         this.image = document.getElementById('boulder');
-        this.speedX = 4;
+        this.speedX = 2;
         this.speedY = 0;    
         this.maxFrame = 0;
 
         this.rotation = 0;
-        this.rotationSpeed = -0.05; // tweak this (0.05–0.2 feels good)
+        this.rotationSpeed = -0.05 * this.game.speed; // tweak this (0.05–0.2 feels good)
 
         this.hitbox = {
             offsetX: 5,
@@ -604,7 +604,7 @@ export class FireSpirit extends FlyingEnemy {
         super(game);
         this.width = 100;
         this.height = 92;
-        this.speedX = 4;
+        this.speedX = 1.5;
         this.speedY = 0;
         this.maxFrame = 7;
         this.image = document.getElementById('fire_spirit');
@@ -623,7 +623,7 @@ export class Devil extends FlyingEnemy {
         super(game);
         this.width = 99.6;
         this.height = 64;
-        this.speedX = 2;
+        this.speedX = 1;
         this.speedY = 0;
         this.maxFrame = 4;
         this.image = document.getElementById('devil');
@@ -715,7 +715,7 @@ export class Golem extends Enemy {
         this.x = this.game.width;
         this.y = this.game.height - this.height - this.game.groundMargin;
         this.image = document.getElementById('golem');
-        this.speedX = 2;
+        this.speedX = 1;
         this.speedY = 0;    
         this.maxFrame = 9;
 
@@ -740,13 +740,13 @@ export class lava_shark extends Enemy {
         this.speedY = 0;    
         this.maxFrame = 7;
 
-        this.baseSpeed = 3;
-        this.jumpSpeed = 4;
+        this.baseSpeed = 1.5;
+        this.jumpSpeed = 2;
         this.speedX = this.baseSpeed;
 
         // jump physics
         this.vy = 0;
-        this.gravity = 2000;
+        this.gravity = 2500;
         this.jumpForce = 900;
 
         // jump timing
@@ -797,7 +797,7 @@ export class Raven extends FlyingEnemy {
         super(game);
         this.width = 97.83;
         this.height = 70;
-        this.speedX = 2;
+        this.speedX = 1;
         this.speedY = 0;
         this.maxFrame = 5;
         this.image = document.getElementById('raven');
@@ -817,7 +817,7 @@ export class AngryCloud extends FlyingEnemy {
         super(game);
         this.width = 58;
         this.height = 50;
-        this.speedX = 3;
+        this.speedX = 1.5;
         this.speedY = 0;
         this.maxFrame = 3;
         this.image = document.getElementById('angry_cloud');
@@ -850,7 +850,7 @@ export class meteor extends FlyingEnemy {
         super(game);
         this.width = 229;
         this.height = 193;
-        this.speedX = 5;
+        this.speedX = 2.5;
         this.speedY = .5;
         this.maxFrame = 7;
         this.image = document.getElementById('meteor');
@@ -862,6 +862,40 @@ export class meteor extends FlyingEnemy {
             width: this.width - 80,
             height: this.height - 40
         };
+
+        // Warning phase
+        this.warningDuration = 1000; // 1 second
+        this.warningTimer = 0;
+        this.isFalling = false;
+
+        this.warningImage = document.getElementById('warning');
+    }
+    update(deltaTime){
+        if(!this.isFalling){
+            // Warning phase
+            this.warningTimer += deltaTime;
+            if(this.warningTimer >= this.warningDuration){
+                this.isFalling = true; // branch starts falling
+            }
+        } else {
+            // Falling phase
+            super.update(deltaTime);
+        }
+    }
+    draw(context){
+        if(!this.isFalling){
+            // Draw warning at top of screen
+            const warningSize = 70; // size in px, square
+            context.drawImage(
+                this.warningImage,
+                this.game.width - warningSize - 20, // right side with padding
+                this.y + this.height / 2 - warningSize / 2,
+                warningSize,                           // width
+                warningSize                            // height
+            );
+        } else {
+            super.draw(context);
+        }
     }
 }
 
@@ -870,7 +904,7 @@ export class Dragon extends FlyingEnemy {
         super(game);
         this.width = 244;
         this.height = 261;
-        this.speedX = 4;
+        this.speedX = 2;
         this.speedY = 0;
         this.frameY = 0;
         this.maxFrame = 5;
@@ -879,9 +913,9 @@ export class Dragon extends FlyingEnemy {
 
         this.hitbox = {
             offsetX: 25,
-            offsetY: 50,
+            offsetY: 75,
             width: this.width - 50,
-            height: this.height - 100
+            height: this.height - 150
         };
     }
 }
@@ -891,7 +925,7 @@ export class Tornado extends FlyingEnemy {
         super(game);
         this.width = 200;
         this.height = 200;
-        this.speedX = 2;
+        this.speedX = 1;
         this.speedY = 0;
         this.maxFrame = 14;
         this.image = document.getElementById('tornado');

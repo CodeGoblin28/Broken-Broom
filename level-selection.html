@@ -12,6 +12,7 @@
         height: 100vh;
         overflow: hidden;
         position: relative;
+        font-family: Arial, sans-serif;
     }
 
     body::before {
@@ -24,7 +25,9 @@
 
     .worlds {
         position: absolute;
-        inset: 0;
+        top: 42%;
+        left: 50%;
+        transform: translate(-50%, -50%);
         display: flex;
         justify-content: center;
         align-items: center;
@@ -97,6 +100,41 @@
         color: black;
         transform: scale(1.05);
     }
+
+    .info-box {
+        position: absolute;
+        left: 50%;
+        bottom: 60px;
+        transform: translateX(-50%);
+        width: min(900px, 80vw);
+        min-height: 110px;
+        z-index: 3;
+
+        padding: 20px 28px;
+        box-sizing: border-box;
+
+        background: rgba(0, 0, 0, 0.65);
+        border: 2px solid rgba(255,255,255,0.75);
+        border-radius: 14px;
+
+        color: white;
+        text-align: center;
+        line-height: 1.6;
+        font-size: 18px;
+
+        box-shadow: 0 0 20px rgba(0,0,0,0.35);
+    }
+
+    .info-title {
+        font-size: 24px;
+        font-weight: bold;
+        margin-bottom: 10px;
+        letter-spacing: 1px;
+    }
+
+    .info-text {
+        opacity: 0.95;
+    }
 </style>
 </head>
 
@@ -126,8 +164,17 @@
     </div>
 </div>
 
+<div class="info-box">
+    <div class="info-title" id="worldTitle">Forest</div>
+    <div class="info-text" id="worldInfo">
+        While flying over the forest, you were struck by a wild bird and sent tumbling through the trees. Your broom shattered on the way down, and now you must search the woods for a sturdy stick to repair it.
+    </div>
+</div>
+
 <script>
     const body = document.body;
+    const worldTitle = document.getElementById("worldTitle");
+    const worldInfo = document.getElementById("worldInfo");
 
     const backgrounds = {
         forest: "asset/Background/Forest/Forest.png",
@@ -137,6 +184,25 @@
     };
 
     const worldOrder = ["forest", "cave", "volcano", "sky"];
+
+    const worldLore = {
+        forest: {
+            title: "Forest",
+            text: "While flying over the forest, you were struck by a wild bird and sent tumbling through the trees. Your broom shattered on the way down, and now you must search the woods for a sturdy stick to repair it."
+        },
+        cave: {
+            title: "Cave",
+            text: "With a solid stick in place, you venture into a spider-infested cave to gather strong steel webs. These webs might reinforce your broom so it will not snap so easily again."
+        },
+        volcano: {
+            title: "Volcano",
+            text: "Now armed with a tougher broom, you brave the volcanic peaks in search of fire rubies. Their power may help your broom fly higher, faster, and with greater force."
+        },
+        sky: {
+            title: "Sky",
+            text: "At last, you soar into the open sky—but the winds up here are fierce and unforgiving. To endure the stormy heights, you must collect magical dragon scales for protection."
+        }
+    };
 
     // default if player has no progress yet
     if (!localStorage.getItem("highestUnlockedWorld")) {
@@ -150,10 +216,17 @@
         window.location.href = "index.html";
     });
 
+    function setWorldInfo(title, text) {
+        worldTitle.textContent = title;
+        worldInfo.textContent = text;
+    }
+
     body.style.backgroundImage = `url(${backgrounds.forest})`;
     body.style.backgroundRepeat = "no-repeat";
     body.style.backgroundSize = "cover";
     body.style.backgroundPosition = "center";
+
+    setWorldInfo(worldLore.forest.title, worldLore.forest.text);
 
     const worlds = document.querySelectorAll('.world');
 
@@ -167,13 +240,31 @@
         }
 
         world.addEventListener('mouseenter', () => {
-            if (!isUnlocked) return;
-            body.style.backgroundImage = `url(${backgrounds[selectedWorld]})`;
+            if (isUnlocked) {
+                body.style.backgroundImage = `url(${backgrounds[selectedWorld]})`;
+                setWorldInfo(
+                    worldLore[selectedWorld].title,
+                    worldLore[selectedWorld].text
+                );
+            } else {
+                const previousWorld = worldOrder[worldIndex - 1];
+                const previousWorldName =
+                    previousWorld.charAt(0).toUpperCase() + previousWorld.slice(1);
+
+                setWorldInfo(
+                    "Locked",
+                    `Complete ${previousWorldName} to unlock.`
+                );
+            }
         });
 
         world.addEventListener('click', () => {
             if (!isUnlocked) {
-                alert(`This world is locked. Complete ${worldOrder[worldIndex - 1]} first.`);
+                const previousWorld = worldOrder[worldIndex - 1];
+                const previousWorldName =
+                    previousWorld.charAt(0).toUpperCase() + previousWorld.slice(1);
+
+                alert(`This world is locked. Complete ${previousWorldName} first.`);
                 return;
             }
 
