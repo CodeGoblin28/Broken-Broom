@@ -850,7 +850,7 @@ export class meteor extends FlyingEnemy {
         super(game);
         this.width = 229;
         this.height = 193;
-        this.speedX = 2.5;
+        this.speedX = 2;
         this.speedY = .5;
         this.maxFrame = 7;
         this.image = document.getElementById('meteor');
@@ -904,7 +904,7 @@ export class Dragon extends FlyingEnemy {
         super(game);
         this.width = 244;
         this.height = 261;
-        this.speedX = 2;
+        this.speedX = 1.5;
         this.speedY = 0;
         this.frameY = 0;
         this.maxFrame = 5;

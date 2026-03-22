@@ -196,8 +196,21 @@ body::before {
 
 </div>
 
-<script>
+<audio id="shopMusic" loop>
+    <source src="asset/audio/music/shop.mp3" type="audio/mpeg">
+</audio>
 
+<script>
+const shopMusic = document.getElementById("shopMusic");
+shopMusic.volume = 0.4;
+
+function startShopMusic() {
+    shopMusic.play().catch(() => {});
+}
+
+window.addEventListener("load", startShopMusic, { once: true });
+window.addEventListener("click", startShopMusic, { once: true });
+window.addEventListener("keydown", startShopMusic, { once: true });
 /* LOAD COINS */
 
 let coins = Number(localStorage.getItem("coins")) || 0;

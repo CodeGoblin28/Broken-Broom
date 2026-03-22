@@ -25,7 +25,7 @@
 
     .worlds {
         position: absolute;
-        top: 42%;
+        top: 38%;
         left: 50%;
         transform: translate(-50%, -50%);
         display: flex;
@@ -80,7 +80,7 @@
     }
 
     .back-button {
-        position: absolute;
+        position: relative;
         top: 20px;
         left: 20px;
         z-index: 3;
@@ -104,10 +104,10 @@
     .info-box {
         position: absolute;
         left: 50%;
-        bottom: 60px;
+        bottom: 50px;
         transform: translateX(-50%);
-        width: min(900px, 80vw);
-        min-height: 110px;
+        width: min(950px, 85vw);
+        min-height: 180px;
         z-index: 3;
 
         padding: 20px 28px;
@@ -134,31 +134,186 @@
 
     .info-text {
         opacity: 0.95;
+        margin-bottom: 18px;
+    }
+
+    .difficulty-section {
+        margin-top: 10px;
+    }
+
+    .difficulty-label {
+        font-size: 18px;
+        font-weight: bold;
+        margin-bottom: 12px;
+    }
+
+    .difficulty-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 12px;
+        flex-wrap: wrap;
+    }
+
+    .difficulty-btn {
+        padding: 10px 18px;
+        font-size: 16px;
+        border: 2px solid white;
+        border-radius: 10px;
+        background: rgba(255,255,255,0.08);
+        color: white;
+        cursor: pointer;
+        transition: 0.2s ease;
+    }
+
+    .difficulty-btn:hover {
+        background: white;
+        color: black;
+        transform: translateY(-2px);
+    }
+
+    .difficulty-btn.active {
+        background: gold;
+        color: black;
+        border-color: gold;
+        font-weight: bold;
+    }
+    .trophy-overlay {
+    position: absolute;
+    top: -22px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: none;
+    z-index: 4;
+    pointer-events: none;
+    }
+
+    .trophy-overlay img {
+        width: 56px;
+        height: 56px;
+        filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.9));
+    }
+
+    .world.trophy-unlocked .trophy-overlay {
+        display: block;
+    }
+
+    .endless-section {
+        margin-top: 18px;
+        display: none;
+    }
+
+    .endless-btn {
+        padding: 12px 22px;
+        font-size: 16px;
+        border: 2px solid gold;
+        border-radius: 10px;
+        background: rgba(255, 215, 0, 0.15);
+        color: white;
+        cursor: pointer;
+        transition: 0.2s ease;
+        font-weight: bold;
+    }
+
+    .endless-btn:hover {
+        background: gold;
+        color: black;
+        transform: translateY(-2px);
+    }
+
+    .top-left-ui {
+        position: absolute;
+        top: 20px;
+        left: 20px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        z-index: 10;
+    }
+
+    /* Hint Icon */
+    .hint-icon {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: rgba(255,255,255,0.15);
+        color: white;
+        font-weight: bold;
+        text-align: center;
+        line-height: 28px;
+        cursor: pointer;
+        position: relative;
+        transition: 0.2s ease;
+    }
+
+    .hint-icon:hover {
+        background: gold;
+        color: black;
+    }
+
+    /* Tooltip */
+    .hint-tooltip {
+        position: absolute;
+        top: 120%;
+        left: 0;
+        width: 260px;
+        padding: 10px;
+        font-size: 13px;
+        background: rgba(0,0,0,0.85);
+        color: white;
+        border-radius: 8px;
+        display: none;
+        pointer-events: none;
+    }
+
+    /* Show on hover */
+    .hint-icon:hover .hint-tooltip {
+        display: block;
     }
 </style>
 </head>
 
 <body>
 
-<button class="back-button">← Back</button>
+<div class="top-left-ui">
+    <button class="back-button">← Back</button>
+
+    <div class="hint-icon">
+        ?
+        <div class="hint-tooltip">
+            To unlock endless, you must complete the world in normal mode.
+        </div>
+    </div>
+</div>
 
 <div class="worlds">
     <div class="world" data-world="forest">
+        <div class="trophy-overlay">
+            <img src="asset/icons/trophy.png" alt="Trophy">
+        </div>
         <img src="asset/worlds/Forest.png" alt="Forest">
         <div class="lock-overlay">🔒</div>
     </div>
 
     <div class="world" data-world="cave">
+        <div class="trophy-overlay">
+            <img src="asset/icons/trophy.png" alt="Trophy">
+        </div>
         <img src="asset/worlds/Cave.png" alt="Cave">
         <div class="lock-overlay">🔒</div>
     </div>
 
     <div class="world" data-world="volcano">
+        <div class="trophy-overlay">
+            <img src="asset/icons/trophy.png" alt="Trophy">
+        </div>
         <img src="asset/worlds/Volcano.png" alt="Volcano">
         <div class="lock-overlay">🔒</div>
     </div>
 
     <div class="world" data-world="sky">
+        <div class="trophy-overlay">
+            <img src="asset/icons/trophy.png" alt="Trophy">
+        </div>
         <img src="asset/worlds/Sky.png" alt="Sky">
         <div class="lock-overlay">🔒</div>
     </div>
@@ -169,12 +324,43 @@
     <div class="info-text" id="worldInfo">
         While flying over the forest, you were struck by a wild bird and sent tumbling through the trees. Your broom shattered on the way down, and now you must search the woods for a sturdy stick to repair it.
     </div>
+
+    <div class="difficulty-section">
+        <div class="difficulty-label">Select Difficulty</div>
+        <div class="difficulty-buttons">
+            <button class="difficulty-btn" data-difficulty="supereasy">Super Easy</button>
+            <button class="difficulty-btn" data-difficulty="easy">Easy</button>
+            <button class="difficulty-btn active" data-difficulty="normal">Normal</button>
+            <button class="difficulty-btn" data-difficulty="hard">Hard</button>
+        </div>
+    </div>
+
+    <div class="endless-section" id="endlessSection">
+        <button class="endless-btn" id="endlessBtn">Play Endless Mode</button>
+    </div>
 </div>
+
+<audio id="menuMusic" loop>
+    <source src="asset/audio/music/menu.mp3" type="audio/mpeg">
+</audio>
 
 <script>
     const body = document.body;
     const worldTitle = document.getElementById("worldTitle");
     const worldInfo = document.getElementById("worldInfo");
+    const endlessSection = document.getElementById("endlessSection");
+    const endlessBtn = document.getElementById("endlessBtn");
+
+    const menuMusic = document.getElementById("menuMusic");
+    menuMusic.volume = 0.4;
+
+    function startMenuMusic() {
+        menuMusic.play().catch(() => {});
+    }
+
+    window.addEventListener("load", startMenuMusic, { once: true });
+    window.addEventListener("click", startMenuMusic, { once: true });
+    window.addEventListener("keydown", startMenuMusic, { once: true });
 
     const backgrounds = {
         forest: "asset/Background/Forest/Forest.png",
@@ -204,13 +390,26 @@
         }
     };
 
-    // default if player has no progress yet
+    let selectedDifficulty = "normal";
+    let hoveredWorld = "forest";
+
+    document.querySelectorAll(".difficulty-btn").forEach(button => {
+        button.addEventListener("click", () => {
+            document.querySelectorAll(".difficulty-btn").forEach(btn => btn.classList.remove("active"));
+            button.classList.add("active");
+            selectedDifficulty = button.dataset.difficulty;
+        });
+    });
+
     if (!localStorage.getItem("highestUnlockedWorld")) {
         localStorage.setItem("highestUnlockedWorld", "forest");
     }
 
     const highestUnlockedWorld = localStorage.getItem("highestUnlockedWorld");
     const highestIndex = worldOrder.indexOf(highestUnlockedWorld);
+
+    const endlessUnlocked = localStorage.getItem("endlessUnlocked") === "true";
+    const endlessBestTime = Number(localStorage.getItem("endlessBestTime")) || 0;
 
     document.querySelector('.back-button').addEventListener('click', () => {
         window.location.href = "index.html";
@@ -221,12 +420,34 @@
         worldInfo.textContent = text;
     }
 
+    function updateEndlessButton(worldName, isUnlocked) {
+        const trophyUnlocked = localStorage.getItem(`${worldName}TrophyUnlocked`) === "true";
+        const endlessUnlocked = localStorage.getItem(`${worldName}EndlessUnlocked`) === "true";
+        const endlessBestTime = Number(localStorage.getItem(`${worldName}EndlessBestTime`)) || 0;
+
+        // show endless if either trophy OR endless unlock exists
+        if (isUnlocked && (trophyUnlocked || endlessUnlocked)) {
+            endlessSection.style.display = "block";
+
+            const label = worldName.charAt(0).toUpperCase() + worldName.slice(1);
+
+            if (endlessBestTime > 0) {
+                endlessBtn.textContent = `Play ${label} Endless (Best: ${endlessBestTime.toFixed(1)}s)`;
+            } else {
+                endlessBtn.textContent = `Play ${label} Endless`;
+            }
+        } else {
+            endlessSection.style.display = "none";
+        }
+    }
+
     body.style.backgroundImage = `url(${backgrounds.forest})`;
     body.style.backgroundRepeat = "no-repeat";
     body.style.backgroundSize = "cover";
     body.style.backgroundPosition = "center";
 
     setWorldInfo(worldLore.forest.title, worldLore.forest.text);
+    updateEndlessButton("forest", true);
 
     const worlds = document.querySelectorAll('.world');
 
@@ -239,7 +460,14 @@
             world.classList.add("locked");
         }
 
+        const trophyUnlocked = localStorage.getItem(`${selectedWorld}TrophyUnlocked`) === "true";
+        if (trophyUnlocked) {
+            world.classList.add("trophy-unlocked");
+        }
+
         world.addEventListener('mouseenter', () => {
+            hoveredWorld = selectedWorld;
+
             if (isUnlocked) {
                 body.style.backgroundImage = `url(${backgrounds[selectedWorld]})`;
                 setWorldInfo(
@@ -256,6 +484,8 @@
                     `Complete ${previousWorldName} to unlock.`
                 );
             }
+
+            updateEndlessButton(selectedWorld, isUnlocked);
         });
 
         world.addEventListener('click', () => {
@@ -268,10 +498,16 @@
                 return;
             }
 
-            window.location.href = `game.html?world=${selectedWorld}`;
+            window.location.href = `game.html?world=${selectedWorld}&difficulty=${selectedDifficulty}`;
         });
     });
+
+    endlessBtn.addEventListener("click", () => {
+        window.location.href = `game.html?world=${hoveredWorld}&difficulty=${selectedDifficulty}&mode=endless`;
+    });
 </script>
+
+
 
 </body>
 </html>

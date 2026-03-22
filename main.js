@@ -18,6 +18,22 @@ window.addEventListener('load', function(){
     // Get selected world from URL
     const urlParams = new URLSearchParams(window.location.search);
     const selectedWorld = urlParams.get("world");
+    const selectedDifficulty = urlParams.get("difficulty") || "normal";
+    const selectedMode = urlParams.get("mode") || "quest";
+
+    const difficultySettings = {
+        supereasy: 5,
+        easy: 10,
+        normal: 15,
+        hard: 20
+    };
+
+    const difficultyLabels = {
+        supereasy: "Super Easy",
+        easy: "Easy",
+        normal: "Normal",
+        hard: "Hard"
+    };
 
     class Game {
         constructor(width, height, world){
@@ -40,6 +56,18 @@ window.addEventListener('load', function(){
             this.playerStillThreshold = 500;
             this.lastPlayerX = 0;
 
+            // =========================
+            // Game Mode
+            // =========================    
+            this.mode = selectedMode;
+            this.isEndless = this.mode === "endless";
+            this.endlessUnlockKey = `${this.world}EndlessUnlocked`;
+            this.trophyUnlockKey = `${this.world}TrophyUnlocked`;
+            this.endlessBestKey = `${this.world}EndlessBestTime`;
+            this.bestEndlessTime = Number(localStorage.getItem(this.endlessBestKey)) || 0;
+
+            this.endlessScoreSaved = false;
+
             if (world === "cave") {
                 this.background = new BackgroundCave(this);
             } else if(world === "volcano") {
@@ -51,7 +79,23 @@ window.addEventListener('load', function(){
             }
 
             this.world = world;
-            this.floorHeight = 50;
+            // =========================
+            // MUSIC
+            // =========================
+            this.musicStarted = false;
+
+            const musicMap = {
+                forest: document.getElementById("forestMusic"),
+                cave: document.getElementById("caveMusic"),
+                volcano: document.getElementById("volcanoMusic"),
+                sky: document.getElementById("skyMusic")
+            };
+
+            this.bgMusic = musicMap[this.world] || null;
+
+            if (this.bgMusic) {
+                this.bgMusic.volume = 0.4;
+            }
 
             // Coin
             this.coins = [];
@@ -61,7 +105,7 @@ window.addEventListener('load', function(){
             this.powerUps = [];
             this.powerUpTimer = 0;
             this.powerUpInterval = 10000; // check every 10 sec
-            this.powerUpChance = 0.10;   // 10% chance to spawn
+            this.powerUpChance = 0.20;   // 20% chance to spawn
 
             this.powerUpMessage = "";
             this.powerUpMessageTimer = 0;
@@ -72,22 +116,30 @@ window.addEventListener('load', function(){
             this.questItems = [];
             this.questItemTimer = 0;
             this.questItemInterval = 10000;
-            this.questItemAmount = 5;
+            this.difficulty = selectedDifficulty;
+            this.difficultyLabel = difficultyLabels[selectedDifficulty] || "Normal";
+            this.questItemAmount = this.isEndless ? 0 : (difficultySettings[selectedDifficulty] || 15);
             this.questComplete = false;
+
 
             this.questItemsCollected = 0;
             this.questItemImage = null;
 
-            if(this.world === "forest") this.questItemImage = document.getElementById('stick');
-            else if(this.world === "cave") this.questItemImage = document.getElementById('web');
-            else if(this.world === "volcano") this.questItemImage = document.getElementById('ruby');
-            else if(this.world === "sky") this.questItemImage = document.getElementById('scale');
+            if (!this.isEndless) {
+                if(this.world === "forest") this.questItemImage = document.getElementById('stick');
+                else if(this.world === "cave") this.questItemImage = document.getElementById('web');
+                else if(this.world === "volcano") this.questItemImage = document.getElementById('ruby');
+                else if(this.world === "sky") this.questItemImage = document.getElementById('scale');
+            } else {
+                this.questItemImage = null;
+            }
 
             this.coinCount = parseInt(localStorage.getItem("coins")) || 0;
 
             // =========================
             // APPLY SHOP UPGRADES
             // =========================
+            this.lives = 5;
 
             // Health Up
             const hasHealthUp = localStorage.getItem("healthUp") === "owned";
@@ -99,7 +151,6 @@ window.addEventListener('load', function(){
             const hasShield = localStorage.getItem("upgrade_shield") === "owned";
             this.startWithShield = hasShield;
 
-            this.lives = 5;
 
             this.player = new Player(this);
             this.input = new InputHandler(this);
@@ -145,6 +196,7 @@ window.addEventListener('load', function(){
 
         update(deltaTime){
             if (this.input.keys.includes("Escape") && (game.gameOver || !this.gameStarted)) {
+                this.stopMusic();
                 window.location.href = "level-selection.html";
             }
 
@@ -169,15 +221,20 @@ window.addEventListener('load', function(){
             if (!this.gameStarted) {
                 if (this.input.keys.some(key => movementKeys.includes(key))) {
                     this.gameStarted = true;
+                    this.startMusic();
                 }
             }
 
-            if (this.questItemsCollected == this.questItemAmount && !this.win) {
+            if (!this.isEndless && this.questItemsCollected == this.questItemAmount && !this.win) {
                 this.gameOver = true;
                 this.win = true;
                 this.unlockNextWorld();
             }
 
+
+            // =========================
+            // Speed Difficulty
+            // =========================  
             this.baseSpeed = this.gameStarted ? 2 : 0;
 
             // Increase difficulty gradually
@@ -190,6 +247,7 @@ window.addEventListener('load', function(){
 
             // Apply to game speed
             this.speed = this.baseSpeed * this.difficultyMultiplier;      
+
 
             // Coin spawning
             if(!game.gameOver){
@@ -233,13 +291,13 @@ window.addEventListener('load', function(){
                 }
             });
 
-            if ((this.questItemsCollected >= this.questItemAmount && !this.questComplete) || this.gameOver) {
+            if ((!this.isEndless && this.questItemsCollected >= this.questItemAmount && !this.questComplete) || this.gameOver) {
                 this.questComplete = true;
                 this.questItems.forEach(item => item.markForDeletion = true);
                 console.log("Quest Complete! All quest items removed.");
             }
 
-            if(this.questItemsCollected < this.questItemAmount){
+            if(!this.isEndless && this.questItemsCollected < this.questItemAmount){
                 if(this.questItemTimer > this.questItemInterval){
                     this.addQuestItem();
                     this.questItemTimer = 0;
@@ -329,6 +387,11 @@ window.addEventListener('load', function(){
                 collision.update(deltaTime);
                 if (collision.markForDeletion) this.collisions.splice(index, 1);
             });
+
+            if (this.isEndless && this.gameOver && !this.endlessScoreSaved) {
+                this.saveEndlessBestTime();
+                this.endlessScoreSaved = true;
+            }
         }
 
         draw(context){
@@ -506,6 +569,26 @@ window.addEventListener('load', function(){
             if (nextWorldIndex > currentHighestIndex) {
                 localStorage.setItem("highestUnlockedWorld", nextWorld);
             }
+
+            // Unlock endless + trophy for the world you completed
+            if (!this.isEndless) {
+                localStorage.setItem(`${this.world}EndlessUnlocked`, "true");
+                localStorage.setItem(`${this.world}TrophyUnlocked`, "true");
+            }
+        }
+
+        saveEndlessBestTime() {
+            if (!this.isEndless) return;
+
+            const survivedTime = this.time * 0.001;
+            const currentBest = Number(localStorage.getItem(this.endlessBestKey)) || 0;
+
+            if (survivedTime > currentBest) {
+                localStorage.setItem(this.endlessBestKey, survivedTime.toFixed(1));
+                this.bestEndlessTime = survivedTime;
+            } else {
+                this.bestEndlessTime = currentBest;
+            }
         }
 
         continueGame(){
@@ -527,6 +610,10 @@ window.addEventListener('load', function(){
 
             this.eventAnnouncement = "";
             this.eventAnnouncementTimer = 0;
+
+            this.endlessScoreSaved = false;
+
+            this.difficultyMultiplier = 1;
 
             this.powerUps = [];
             this.powerUpTimer = 0;
@@ -571,10 +658,14 @@ window.addEventListener('load', function(){
             this.eventAnnouncement = "";
             this.eventAnnouncementTimer = 0;
 
+            this.endlessScoreSaved = false;
+
             this.powerUps = [];
             this.powerUpTimer = 0;
             this.powerUpMessage = "";
             this.powerUpMessageTimer = 0;
+
+            this.difficultyMultiplier = 1;
 
             this.gameStarted = false;
         }
@@ -588,6 +679,21 @@ window.addEventListener('load', function(){
             const types = ["bomb", "potion", "shield"];
             const randomType = types[Math.floor(Math.random() * types.length)];
             this.powerUps.push(new PowerUp(this, randomType));
+        }
+
+        startMusic() {
+            if (this.bgMusic && !this.musicStarted) {
+                this.bgMusic.play().catch(() => {});
+                this.musicStarted = true;
+            }
+        }
+
+        stopMusic() {
+            if (this.bgMusic) {
+                this.bgMusic.pause();
+                this.bgMusic.currentTime = 0;
+            }
+            this.musicStarted = false;
         }
     }
 

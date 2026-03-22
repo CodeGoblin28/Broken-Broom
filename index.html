@@ -381,13 +381,23 @@ resetProgressBtn.addEventListener("click", () => {
         "- lock all worlds except Forest\n" +
         "- remove bought skins\n" +
         "- remove bought upgrades\n" +
-        "- equip the default skin again"
+        "- equip the default skin again\n" +
+        "- remove the Sky trophy\n" +
+        "- lock Endless Mode\n" +
+        "- erase all Endless best time"
     );
 
     if (!confirmed) return;
 
     // Reset world unlock progress
     localStorage.setItem("highestUnlockedWorld", "forest");
+
+    // Reset endless/trophies/best times for all worlds
+    ["forest", "cave", "volcano", "sky"].forEach(world => {
+        localStorage.removeItem(`${world}EndlessUnlocked`);
+        localStorage.removeItem(`${world}TrophyUnlocked`);
+        localStorage.removeItem(`${world}EndlessBestTime`);
+    });
 
     // Reset owned skins
     localStorage.removeItem("blue");
@@ -407,6 +417,23 @@ resetProgressBtn.addEventListener("click", () => {
 
     alert("Progression has been reset.");
 });
+</script>
+
+<audio id="menuMusic" loop>
+    <source src="asset/audio/music/menu.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+const menuMusic = document.getElementById("menuMusic");
+menuMusic.volume = 0.4;
+
+function startMenuMusic() {
+    menuMusic.play().catch(() => {});
+}
+
+window.addEventListener("load", startMenuMusic, { once: true });
+window.addEventListener("click", startMenuMusic, { once: true });
+window.addEventListener("keydown", startMenuMusic, { once: true });
 </script>
 
 </body>
