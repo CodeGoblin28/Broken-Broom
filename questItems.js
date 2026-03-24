@@ -29,7 +29,7 @@ class Objective {
 
     update(deltaTime){
         const dt = deltaTime * 0.001;
-        const fpsScale = 200;
+        const fpsScale = 150;
 
         this.speedX = this.game.speed * this.speedMultiplier;
         this.x -= this.speedX * fpsScale * dt;

@@ -18,7 +18,7 @@ class Enemy {
     }
     update(deltaTime){
         const dt = deltaTime * 0.001;
-        const fpsScale = 200;
+        const fpsScale = 150;
 
         this.x -= this.speedX * this.game.speed * fpsScale * dt;
         this.y += this.speedY * fpsScale * dt;

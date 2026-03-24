@@ -23,7 +23,7 @@ export class Coin {
 
     update(deltaTime){
         const dt = deltaTime * 0.001;
-        const fpsScale = 200;
+        const fpsScale = 150;
 
         this.x -= this.speedX * fpsScale * dt;
 

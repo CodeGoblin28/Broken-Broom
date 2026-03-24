@@ -10,7 +10,7 @@ class Layer{
     }
     update(deltaTime){
         const dt = deltaTime * 0.001;
-        const fpsScale = 200;
+        const fpsScale = 150;
 
         if (this.x < -this.width) this.x = 0;
         else this.x -= this.game.speed * this.speedModifier * fpsScale * dt;
