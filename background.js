@@ -8,9 +8,12 @@ class Layer{
         this.x = 0;
         this.y = -160;
     }
-    update(){
-        if(this.x < -this.width) this.x = 0;
-        else this.x -= this.game.speed * this.speedModifier;
+    update(deltaTime){
+        const dt = deltaTime * 0.001;
+        const fpsScale = 200;
+
+        if (this.x < -this.width) this.x = 0;
+        else this.x -= this.game.speed * this.speedModifier * fpsScale * dt;
     }
     draw(context){
         context.drawImage(this.image, this.x, this.y, this.width, this.height);
@@ -43,10 +46,10 @@ export class BackgroundForest {
         this.layer9 = new Layer(this.game, this.width, this.height, 0.8, this.layer9Image);
         this.backgroundLayers = [this.layer1, this.layer2, this.layer3, this.layer4, this.layer5, this.layer6, this.layer7, this.layer8, this.layer9];
     }
-    update(){
+    update(deltaTime){
         this.backgroundLayers.forEach(layer => {
-            layer.update();
-        })
+            layer.update(deltaTime);
+        });
     }
     draw(context){
         this.backgroundLayers.forEach(layer => {
@@ -78,9 +81,9 @@ export class BackgroundCave {
         this.layer0 = new Layer(this.game, this.width, this.height + 60, 0.8, this.layer0Image);
         this.backgroundLayers = [this.layer1, this.layer2, this.layer3, this.layer4, this.layer5, this.layer6, this.layer7, this.layer0];
     }
-    update(){
+    update(deltaTime){
         this.backgroundLayers.forEach(layer => {
-            layer.update();
+            layer.update(deltaTime);
         })
     }
     draw(context){
@@ -109,9 +112,9 @@ export class BackgroundVolcano {
         this.layer6 = new Layer(this.game, this.width, this.height, 0.8, this.layer0Image);
         this.backgroundLayers = [this.layer1, this.layer2, this.layer3, this.layer4, this.layer5, this.layer6];
     }
-    update(){
+    update(deltaTime){
         this.backgroundLayers.forEach(layer => {
-            layer.update();
+            layer.update(deltaTime);
         })
     }
     draw(context){
@@ -138,9 +141,9 @@ export class BackgroundSky {
         this.layer5 = new Layer(this.game, this.width, this.height, 0.8, this.layer5Image);
         this.backgroundLayers = [this.layer1, this.layer2, this.layer3, this.layer4, this.layer5];
     }
-    update(){
+    update(deltaTime){
         this.backgroundLayers.forEach(layer => {
-            layer.update();
+            layer.update(deltaTime);
         })
     }
     draw(context){

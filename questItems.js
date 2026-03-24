@@ -28,16 +28,17 @@ class Objective {
     }
 
     update(deltaTime){
-        this.speedX = this.game.speed * this.speedMultiplier; // follow game speed
-        this.x -= this.speedX;
+        const dt = deltaTime * 0.001;
+        const fpsScale = 200;
 
-        // Off screen
+        this.speedX = this.game.speed * this.speedMultiplier;
+        this.x -= this.speedX * fpsScale * dt;
+
         if (this.x + this.width < 0) this.markForDeletion = true;
 
-        // Collision with player
         if (this.checkCollision(this.game.player)) {
-            if(this.game.addQuest) this.game.addQuest(); // call generic quest function
             this.game.audio.play('quest_collect');
+            if(this.game.addQuest) this.game.addQuest();
             this.markForDeletion = true;
         }
     }

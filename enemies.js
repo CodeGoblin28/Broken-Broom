@@ -17,8 +17,12 @@ class Enemy {
         };
     }
     update(deltaTime){
-        this.x -= this.speedX * this.game.speed;
-        this.y += this.speedY;
+        const dt = deltaTime * 0.001;
+        const fpsScale = 200;
+
+        this.x -= this.speedX * this.game.speed * fpsScale * dt;
+        this.y += this.speedY * fpsScale * dt;
+
         if(this.frameTimer > this.frameInterval){
             this.frameTimer = 0;
             if (this.frameX < this.maxFrame) this.frameX++;
@@ -27,7 +31,6 @@ class Enemy {
             this.frameTimer += deltaTime;
         }
 
-        // Check off screen
         if (this.x + this.width < 0) this.markForDeletion = true;
     }
     draw(context){

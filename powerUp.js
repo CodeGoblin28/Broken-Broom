@@ -29,7 +29,10 @@ export class PowerUp {
     }
 
     update(deltaTime){
-        this.x -= this.speedX * this.game.speed;
+            const dt = deltaTime * 0.001;
+            const fpsScale = 200;
+
+            this.x -= this.speedX * this.game.speed * fpsScale * dt;
 
         if (this.x + this.width < 0) {
             this.markForDeletion = true;

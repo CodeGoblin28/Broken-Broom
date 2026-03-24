@@ -320,7 +320,7 @@ window.addEventListener('load', function(){
                 if(item.markForDeletion) this.questItems.splice(index, 1);
             });
 
-            this.background.update();
+            this.background.update(deltaTime);
             this.player.update(this.input.keys, deltaTime);
 
             // detect if player stopped moving
@@ -694,8 +694,10 @@ window.addEventListener('load', function(){
     let lastTime = 0;
 
     function animate(timeStamp){
-        const deltaTime = timeStamp - lastTime;
+        let deltaTime = timeStamp - lastTime;
         lastTime = timeStamp;
+
+        if (deltaTime > 50) deltaTime = 50;
 
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         game.update(deltaTime);

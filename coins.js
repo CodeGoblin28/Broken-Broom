@@ -15,24 +15,25 @@ export class Coin {
         }
 
 
-        this.speedX = this.game.speed * .8;
+        this.speedX = this.game.speed * 0.8;
         this.markForDeletion = false;
 
         this.image = document.getElementById('coin');
     }
 
     update(deltaTime){
-        this.x -= this.speedX;
+        const dt = deltaTime * 0.001;
+        const fpsScale = 200;
 
-        // Off screen
+        this.x -= this.speedX * fpsScale * dt;
+
         if (this.x + this.width < 0) {
             this.markForDeletion = true;
         }
 
-        // Collision with player
         if (this.checkCollision(this.game.player)) {
-            this.game.addCoin();
             this.game.audio.play('coin');
+            this.game.addCoin();
             this.markForDeletion = true;
         }
     }

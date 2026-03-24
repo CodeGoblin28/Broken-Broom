@@ -39,7 +39,10 @@ export class CollisionAnimation {
     }
 
     update(deltaTime){
-        this.x -= this.game.speed;
+        const dt = deltaTime * 0.001;
+        const fpsScale = 200;
+
+        this.x -= this.game.speed * fpsScale * dt;
 
         if (this.frameTimer > this.frameInterval){
             this.frameX++;
