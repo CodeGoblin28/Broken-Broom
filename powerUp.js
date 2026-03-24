@@ -74,14 +74,17 @@ export class PowerUp {
     applyEffect(){
         if (this.type === "bomb") {
             this.game.enemies.forEach(enemy => enemy.markForDeletion = true);
+            this.game.audio.play('bomb');
             this.game.powerUpMessage = "BOOOM! All enemies cleared!";
         } 
         else if (this.type === "potion") {
             this.game.lives++;
+            this.game.audio.play('potion');
             this.game.powerUpMessage = "Potion! +1 Health!";
         } 
         else if (this.type === "shield") {
             this.game.player.shield += 1;
+            this.game.audio.play('shield');
             this.game.powerUpMessage = "Shield gained!";
         }
 

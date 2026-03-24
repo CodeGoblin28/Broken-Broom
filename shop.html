@@ -202,9 +202,21 @@ body::before {
 
 <script>
 const shopMusic = document.getElementById("shopMusic");
-shopMusic.volume = 0.4;
+
+function getMusicVolume(){
+    return Number(localStorage.getItem("musicVolume") ?? 0.4);
+}
+
+function isMusicMuted(){
+    return localStorage.getItem("musicMuted") === "true";
+}
+
+function applyShopMusicSettings(){
+    shopMusic.volume = isMusicMuted() ? 0 : getMusicVolume();
+}
 
 function startShopMusic() {
+    applyShopMusicSettings();
     shopMusic.play().catch(() => {});
 }
 

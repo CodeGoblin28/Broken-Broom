@@ -32,6 +32,7 @@ export class Coin {
         // Collision with player
         if (this.checkCollision(this.game.player)) {
             this.game.addCoin();
+            this.game.audio.play('coin');
             this.markForDeletion = true;
         }
     }

@@ -132,12 +132,17 @@ export class Wolf extends Enemy {
         this.warningDuration = 1000; // 1 second
         this.warningTimer = 0;
         this.isFalling = false;
+        this.warningSoundPlayed = false;
 
         this.warningImage = document.getElementById('warning');
 
     }
     update(deltaTime){
         if(!this.isFalling){
+            if (!this.warningSoundPlayed) {
+                this.game.audio.play('warning');
+                this.warningSoundPlayed = true;
+            }
             // Warning phase
             this.warningTimer += deltaTime;
             if(this.warningTimer >= this.warningDuration){
@@ -146,6 +151,10 @@ export class Wolf extends Enemy {
         } else {
             // Falling phase
             super.update(deltaTime);
+            if (this.warningSoundPlayed) {
+                this.game.audio.play('wolf_growl');
+                this.warningSoundPlayed = false;
+            }
         }
     }
     draw(context){
@@ -186,6 +195,7 @@ export class FallingBranch extends Enemy {
         this.warningDuration = 1000; // 1 second
         this.warningTimer = 0;
         this.isFalling = false;
+        this.warningSoundPlayed = false;
 
         this.hitbox = {
             offsetX: 0,
@@ -200,6 +210,10 @@ export class FallingBranch extends Enemy {
 
     update(deltaTime){
         if(!this.isFalling){
+            if (!this.warningSoundPlayed) {
+                this.game.audio.play('warning');
+                this.warningSoundPlayed = true;
+            }
             // Warning phase
             this.warningTimer += deltaTime;
             if(this.warningTimer >= this.warningDuration){
@@ -208,6 +222,11 @@ export class FallingBranch extends Enemy {
         } else {
             // Falling phase
             super.update(deltaTime);
+
+            if (this.warningSoundPlayed) {
+                this.game.audio.play('branch_snap');
+                this.warningSoundPlayed = false;
+            }
 
             const ground = this.game.height - this.height - this.game.groundMargin;
             if(this.y > ground){
@@ -268,6 +287,7 @@ export class Slime extends Enemy {
             width: this.width,
             height: this.height
         };
+
     }
 
     update(deltaTime){
@@ -294,6 +314,7 @@ export class Slime extends Enemy {
                 this.vy = -this.jumpForce;
                 this.speedX = this.jumpSpeed;
                 this.jumpTimer = 0;
+                this.game.audio.play('slime_splat');
             }
         }
     }
@@ -344,6 +365,7 @@ export class Spidercrawler extends Enemy {
         this.speedX = 1.5;
         this.speedY = 0;    
         this.maxFrame = 4;
+        this.SoundPlayed = false;
 
         this.hitbox = {
             offsetX: 30,
@@ -351,6 +373,47 @@ export class Spidercrawler extends Enemy {
             width: this.width - 30,
             height: this.height 
         };
+    }
+
+    update(deltaTime){
+        super.update(deltaTime);
+
+        if (!this.SoundPlayed) {
+            this.game.audio.play('spider_crawl');
+            this.SoundPlayed = true;
+        }
+    }
+}
+
+export class Spiderceiling extends Enemy {
+    constructor(game){
+        super(game);
+        this.game = game;
+        this.width = 166.8;
+        this.height = 72;
+        this.x = this.game.width;
+        this.y = 0;
+        this.image = document.getElementById('spiderceiling');
+        this.speedX = 1.5;
+        this.speedY = 0;    
+        this.maxFrame = 4;
+        this.SoundPlayed = false;
+
+        this.hitbox = {
+            offsetX: 30,
+            offsetY: 0,
+            width: this.width - 30,
+            height: this.height 
+        };
+    }
+
+    update(deltaTime){
+        super.update(deltaTime);
+
+        if (!this.SoundPlayed) {
+            this.game.audio.play('spider_crawl');
+            this.SoundPlayed = true;
+        }
     }
 }
 
@@ -421,6 +484,7 @@ export class Stalactite extends Enemy {
         this.warningDuration = 1000; // 1 second
         this.warningTimer = 0;
         this.isFalling = false;
+        this.warningSoundPlayed = false;
 
         this.hitbox = {
             offsetX: 0,
@@ -435,6 +499,10 @@ export class Stalactite extends Enemy {
 
     update(deltaTime){
         if(!this.isFalling){
+            if (!this.warningSoundPlayed) {
+                this.game.audio.play('warning');
+                this.warningSoundPlayed = true;
+            }
             // Warning phase
             this.warningTimer += deltaTime;
             if(this.warningTimer >= this.warningDuration){
@@ -443,6 +511,11 @@ export class Stalactite extends Enemy {
         } else {
             // Falling phase
             super.update(deltaTime);
+
+            if (this.warningSoundPlayed) {
+                this.game.audio.play('crumble_stalactite');
+                this.warningSoundPlayed = false;
+            }
 
             const ground = this.game.height - this.height - this.game.groundMargin;
             if(this.y > ground){
@@ -528,12 +601,18 @@ export class Boulder extends Enemy {
         this.warningDuration = 1000; // 1 second
         this.warningTimer = 0;
         this.isFalling = false;
+        this.warningSoundPlayed = false;
 
         this.warningImage = document.getElementById('warning');
 
     }
     update(deltaTime){
         if(!this.isFalling){
+            if (!this.warningSoundPlayed) {
+                this.game.audio.play('warning');
+                this.game.audio.play('boulder');
+                this.warningSoundPlayed = true;
+            }
             // Warning phase
             this.warningTimer += deltaTime;
             if(this.warningTimer >= this.warningDuration){
@@ -659,6 +738,7 @@ export class FireBall extends Enemy {
         this.warningDuration = 1000; // 1 second
         this.warningTimer = 0;
         this.isFalling = false;
+        this.warningSoundPlayed = false;
 
         this.hitbox = {
             offsetX: 0,
@@ -673,6 +753,10 @@ export class FireBall extends Enemy {
 
     update(deltaTime){
         if(!this.isFalling){
+            if (!this.warningSoundPlayed) {
+                this.game.audio.play('warning');
+                this.warningSoundPlayed = true;
+            }
             // Warning phase
             this.warningTimer += deltaTime;
             if(this.warningTimer >= this.warningDuration){
@@ -681,6 +765,11 @@ export class FireBall extends Enemy {
         } else {
             // Falling phase
             super.update(deltaTime);
+
+            if (this.warningSoundPlayed) {
+                this.game.audio.play('fireball');
+                this.warningSoundPlayed = false;
+            }
 
             const ground = this.game.height - this.height - this.game.groundMargin;
             if(this.y > ground){
@@ -853,6 +942,7 @@ export class meteor extends FlyingEnemy {
         this.speedX = 2;
         this.speedY = .5;
         this.maxFrame = 7;
+        this.x = this.game.width;
         this.image = document.getElementById('meteor');
         this.y = Math.random() * this.game.height * 0.7;
 
@@ -867,11 +957,16 @@ export class meteor extends FlyingEnemy {
         this.warningDuration = 1000; // 1 second
         this.warningTimer = 0;
         this.isFalling = false;
+        this.warningSoundPlayed = false;
 
         this.warningImage = document.getElementById('warning');
     }
     update(deltaTime){
         if(!this.isFalling){
+            if (!this.warningSoundPlayed) {
+                this.game.audio.play('warning');
+                this.warningSoundPlayed = true;
+            }
             // Warning phase
             this.warningTimer += deltaTime;
             if(this.warningTimer >= this.warningDuration){
@@ -880,6 +975,10 @@ export class meteor extends FlyingEnemy {
         } else {
             // Falling phase
             super.update(deltaTime);
+            if (this.warningSoundPlayed) {
+                this.game.audio.play('meteor');
+                this.warningSoundPlayed = false;
+            }
         }
     }
     draw(context){
@@ -931,6 +1030,7 @@ export class Tornado extends FlyingEnemy {
         this.image = document.getElementById('tornado');
         this.x = this.game.width;
         this.y = this.game.height - this.height;
+        this.warningSoundPlayed = false;
 
         this.hitbox = {
             offsetX: 30,
@@ -941,6 +1041,11 @@ export class Tornado extends FlyingEnemy {
     }    
     update(deltaTime){
         super.update(deltaTime);
+        if (!this.warningSoundPlayed) {
+            this.game.audio.play('windy');
+            this.warningSoundPlayed = true;
+        }
+        
 
         const player = this.game.player;
 

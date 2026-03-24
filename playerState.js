@@ -67,6 +67,7 @@ export class Jumping extends State{
         this.player.frameX = 0;
         this.player.frameY = 3;
         this.player.maxFrame = 5;
+        this.player.game.audio.play('jump');
     }
     handleInput(input){
         if (this.player.vy > 0){
@@ -87,6 +88,7 @@ export class Falling extends State{
     }
     handleInput(input){
         if (this.player.onGround()){
+            this.player.game.audio.play('landing');
             this.player.setState(states.RUNNING);
         }
         if (input.includes('ArrowDown') || input.includes('s')) {

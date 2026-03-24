@@ -159,6 +159,25 @@
     padding:4px 8px;
     font-size:12px;
 }
+
+.sound-controls{
+    margin-top: -5px;
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+    padding: 10px 0 0 0;
+}
+
+.sound-group{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+
+.sound-group input[type="range"]{
+    width:100%;
+    cursor:pointer;
+}
 </style>
 </head>
 
@@ -182,7 +201,20 @@
 
         <button id="resetCoinsBtn">RESET COINS</button>
         <button id="resetProgressBtn">RESET PROGRESSION</button>
-        <button>DEV MODE</button>
+        <button id="soundBtn">SOUND</button>
+
+        <div id="soundControls" class="sound-controls" style="display:none;">
+            <div class="sound-group">
+                <button id="toggleMusicBtn">MUSIC: ON</button>
+                <input type="range" id="musicVolumeSlider" min="0" max="100" value="40">
+            </div>
+
+            <div class="sound-group">
+                <button id="toggleSfxBtn">AUDIO: ON</button>
+                <input type="range" id="sfxVolumeSlider" min="0" max="100" value="50">
+            </div>
+        </div>
+
         <button id="backBtn">BACK</button>
     </div>
 </div>
@@ -235,6 +267,13 @@ const aboutBackBtn = document.getElementById('aboutBackBtn');
 
 const menu = document.querySelector('.menu');
 
+const soundBtn = document.getElementById("soundBtn");
+const soundControls = document.getElementById("soundControls");
+const toggleMusicBtn = document.getElementById("toggleMusicBtn");
+const toggleSfxBtn = document.getElementById("toggleSfxBtn");
+const musicVolumeSlider = document.getElementById("musicVolumeSlider");
+const sfxVolumeSlider = document.getElementById("sfxVolumeSlider");
+
 settingsBtn.addEventListener('click', () => {
     settingsPanel.style.display = "flex";
     menu.style.display = "none";
@@ -271,6 +310,73 @@ inventoryBackBtn.addEventListener('click', () => {
 
 });
 
+function getMusicVolume(){
+    return Number(localStorage.getItem("musicVolume") ?? 0.4);
+}
+
+function getSfxVolume(){
+    return Number(localStorage.getItem("sfxVolume") ?? 0.5);
+}
+
+function isMusicMuted(){
+    return localStorage.getItem("musicMuted") === "true";
+}
+
+function isSfxMuted(){
+    return localStorage.getItem("sfxMuted") === "true";
+}
+
+function applyMenuMusicSettings(){
+    if (!menuMusic) return;
+
+    menuMusic.volume = isMusicMuted() ? 0 : getMusicVolume();
+}
+
+soundBtn.addEventListener("click", () => {
+    soundControls.style.display =
+        soundControls.style.display === "none" ? "flex" : "none";
+    updateSoundUI();
+});
+
+toggleMusicBtn.addEventListener("click", () => {
+    const newMuted = !isMusicMuted();
+    localStorage.setItem("musicMuted", newMuted);
+    updateSoundUI();
+});
+
+toggleSfxBtn.addEventListener("click", () => {
+    const newMuted = !isSfxMuted();
+    localStorage.setItem("sfxMuted", newMuted);
+    updateSoundUI();
+});
+
+musicVolumeSlider.addEventListener("input", () => {
+    const volume = Number(musicVolumeSlider.value) / 100;
+    localStorage.setItem("musicVolume", volume);
+    localStorage.setItem("musicMuted", volume === 0 ? "true" : "false");
+    updateSoundUI();
+});
+
+sfxVolumeSlider.addEventListener("input", () => {
+    const volume = Number(sfxVolumeSlider.value) / 100;
+    localStorage.setItem("sfxVolume", volume);
+    localStorage.setItem("sfxMuted", volume === 0 ? "true" : "false");
+    updateSoundUI();
+});
+
+// Sounds
+function updateSoundUI(){
+    const musicMuted = isMusicMuted();
+    const sfxMuted = isSfxMuted();
+
+    toggleMusicBtn.textContent = `MUSIC: ${musicMuted ? "OFF" : "ON"}`;
+    toggleSfxBtn.textContent = `AUDIO: ${sfxMuted ? "OFF" : "ON"}`;
+
+    musicVolumeSlider.value = Math.round(getMusicVolume() * 100);
+    sfxVolumeSlider.value = Math.round(getSfxVolume() * 100);
+
+    applyMenuMusicSettings();
+}
 
 const skins = [
 
@@ -417,6 +523,8 @@ resetProgressBtn.addEventListener("click", () => {
 
     alert("Progression has been reset.");
 });
+
+updateSoundUI();
 </script>
 
 <audio id="menuMusic" loop>
@@ -425,9 +533,21 @@ resetProgressBtn.addEventListener("click", () => {
 
 <script>
 const menuMusic = document.getElementById("menuMusic");
-menuMusic.volume = 0.4;
+
+function getMusicVolume(){
+    return Number(localStorage.getItem("musicVolume") ?? 0.4);
+}
+
+function isMusicMuted(){
+    return localStorage.getItem("musicMuted") === "true";
+}
+
+function applyMenuMusicSettings(){
+    menuMusic.volume = isMusicMuted() ? 0 : getMusicVolume();
+}
 
 function startMenuMusic() {
+    applyMenuMusicSettings();
     menuMusic.play().catch(() => {});
 }
 

@@ -87,6 +87,9 @@ export class Player{
         this.lavaBounceForce = 900;
         this.invulnerableTimer = 0;
         this.invulnerableDuration = 500;
+
+        this.stepTimer = 0;
+        this.stepInterval = 500;
     }
     update(input, deltaTime){
         if (this.dead) return;
@@ -99,6 +102,23 @@ export class Player{
             if (this.currentState !== this.states[4]) {
                 this.setState(4); // FLYING
             }
+        }
+
+        if (this.currentState.state === 'RUNNING' && this.onGround()) {
+            this.stepTimer += deltaTime;
+
+            if (this.stepTimer > this.stepInterval) {
+                // choose surface
+                if (this.game.world === 'forest') {
+                    this.game.audio.play('step_grass');
+                } else {
+                    this.game.audio.play('step_rock');
+                }
+
+                this.stepTimer = 0;
+            }
+        } else {
+            this.stepTimer = 0;
         }
 
         if(!this.game.gameStarted){
@@ -222,6 +242,7 @@ export class Player{
 
             // Prevent losing multiple lives instantly
             if (this.invulnerableTimer <= 0) {
+                this.game.audio.play('lava_damage');
                 this.loseLife(true); // true = play player collision effect
                 this.invulnerableTimer = this.invulnerableDuration;
             }
@@ -234,6 +255,7 @@ export class Player{
         // shield blocks one hit
         if (this.shield > 0) {
             this.shield--;
+            this.game.audio.play('shield_block');
             this.game.powerUpMessage = "Shield Blocked!";
             this.game.powerUpMessageTimer = 1000;
             return;
@@ -290,6 +312,8 @@ export class Player{
                 playerBottom > enemyTop
             ) {
                 enemy.markForDeletion = true;
+
+                this.game.audio.play('hit');
 
                 // Enemy effect only
                 this.game.collisions.push(

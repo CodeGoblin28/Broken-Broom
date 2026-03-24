@@ -37,6 +37,7 @@ class Objective {
         // Collision with player
         if (this.checkCollision(this.game.player)) {
             if(this.game.addQuest) this.game.addQuest(); // call generic quest function
+            this.game.audio.play('quest_collect');
             this.markForDeletion = true;
         }
     }

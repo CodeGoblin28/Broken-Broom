@@ -122,7 +122,7 @@ export class UI {
                 if(this.game.world !== 'sky'){
                     context.fillText("Press ESC to Return!!! Next World Has been Unlocked", this.game.width * .5 , this.game.height * .3 + 40 ); 
                 } else {
-                    context.fillText("Press ESC to Return!!! Endless has been unlocked", this.game.width * .5 , this.game.height * .3 + 40 ); 
+                    context.fillText("Press ESC to Return!!! SOAR HIGH TO THE HORIZON!!!", this.game.width * .5 , this.game.height * .3 + 40 ); 
                 }
             } else {
                 context.fillText("Opps!!! You Died", this.game.width * .5 , this.game.height * .3 ); 

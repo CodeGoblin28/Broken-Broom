@@ -352,9 +352,21 @@
     const endlessBtn = document.getElementById("endlessBtn");
 
     const menuMusic = document.getElementById("menuMusic");
-    menuMusic.volume = 0.4;
+
+    function getMusicVolume(){
+        return Number(localStorage.getItem("musicVolume") ?? 0.4);
+    }
+
+    function isMusicMuted(){
+        return localStorage.getItem("musicMuted") === "true";
+    }
+
+    function applyMenuMusicSettings(){
+        menuMusic.volume = isMusicMuted() ? 0 : getMusicVolume();
+    }
 
     function startMenuMusic() {
+        applyMenuMusicSettings();
         menuMusic.play().catch(() => {});
     }
 

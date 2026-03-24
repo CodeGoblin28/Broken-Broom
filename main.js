@@ -1,11 +1,12 @@
 import { Player } from "./player.js";
 import { InputHandler } from "./input.js";
 import { BackgroundForest, BackgroundCave, BackgroundVolcano, BackgroundSky } from "./background.js";
-import { Fly, HangingStalactite, ClimbingSpider, FireSpirit, Ghost, meteor, Tulip, Spidercrawler, AngryCloud, Raven, Boulder, Golem, Slime, Dragon, FallingBranch, lava_shark, Devil, FireBall, Wolf, Tornado, Stalactite } from "./enemies.js";
+import { Fly, Spiderceiling, HangingStalactite, ClimbingSpider, FireSpirit, Ghost, meteor, Tulip, Spidercrawler, AngryCloud, Raven, Boulder, Golem, Slime, Dragon, FallingBranch, lava_shark, Devil, FireBall, Wolf, Tornado, Stalactite } from "./enemies.js";
 import { Coin } from "./coins.js";
 import { UI } from "./UI.js";
 import { Stick, Web, Ruby, Scale } from "./questItems.js";
 import { PowerUp } from "./powerUp.js";
+import { AudioManager } from './audio.js';
 
 // import { Boss } from "./boss.js";
 
@@ -40,6 +41,8 @@ window.addEventListener('load', function(){
             this.width = width;
             this.height = height;
             this.groundMargin = 50;
+
+            this.audio = new AudioManager();
 
             // =========================
             // Speed Difficulty
@@ -94,7 +97,7 @@ window.addEventListener('load', function(){
             this.bgMusic = musicMap[this.world] || null;
 
             if (this.bgMusic) {
-                this.bgMusic.volume = 0.4;
+                this.applyMusicSettings();
             }
 
             // Coin
@@ -195,6 +198,8 @@ window.addEventListener('load', function(){
         }
 
         update(deltaTime){
+            this.applyMusicSettings();
+
             if (this.input.keys.includes("Escape") && (game.gameOver || !this.gameStarted)) {
                 this.stopMusic();
                 window.location.href = "level-selection.html";
@@ -480,7 +485,8 @@ window.addEventListener('load', function(){
             else if (this.world === "cave") {
                 // spider infestation
                 this.enemies.push(new ClimbingSpider(this));
-                this.enemies.push(new Spidercrawler(this));
+                if (Math.random() < 0.5) this.enemies.push(new Spidercrawler(this));
+                else if (Math.random() > 0.5) this.enemies.push(new Spiderceiling(this));
 
                 // optional extra danger
                 if (Math.random() < 0.3) this.enemies.push(new HangingStalactite(this));
@@ -525,6 +531,8 @@ window.addEventListener('load', function(){
                 if (Math.random() < 0.2) this.enemies.push(new Ghost(this));
                 if (Math.random() < 0.3) this.enemies.push(new ClimbingSpider(this));
                 if (Math.random() < 0.3) this.enemies.push(new Spidercrawler(this));
+                else if (Math.random() > 0.7) this.enemies.push(new Spiderceiling(this));
+
                 if (Math.random() < 0.1) this.enemies.push(new Boulder(this));
                 if (Math.random() < 0.3) this.enemies.push(new HangingStalactite(this));
                 if (this.playerStillTimer > this.playerStillThreshold){
@@ -681,8 +689,23 @@ window.addEventListener('load', function(){
             this.powerUps.push(new PowerUp(this, randomType));
         }
 
+        getMusicVolume() {
+            return Number(localStorage.getItem("musicVolume") ?? 0.4);
+        }
+
+        isMusicMuted() {
+            return localStorage.getItem("musicMuted") === "true";
+        }
+
+        applyMusicSettings() {
+            if (this.bgMusic) {
+                this.bgMusic.volume = this.isMusicMuted() ? 0 : this.getMusicVolume();
+            }
+        }
+
         startMusic() {
             if (this.bgMusic && !this.musicStarted) {
+                this.applyMusicSettings();
                 this.bgMusic.play().catch(() => {});
                 this.musicStarted = true;
             }
