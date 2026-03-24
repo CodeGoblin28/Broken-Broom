@@ -58,7 +58,8 @@ window.addEventListener('load', function(){
             this.playerStillTimer = 0;
             this.playerStillThreshold = 500;
             this.lastPlayerX = 0;
-
+            this.world = world;
+            
             // =========================
             // Game Mode
             // =========================    
@@ -81,7 +82,6 @@ window.addEventListener('load', function(){
                 this.background = new BackgroundForest(this);
             }
 
-            this.world = world;
             // =========================
             // MUSIC
             // =========================
@@ -208,9 +208,7 @@ window.addEventListener('load', function(){
             if (this.input.keys.includes(' ') && this.gameOver && !this.restartPressed) {
                 this.restartPressed = true;
 
-                if (this.win) {
-                    this.continueGame();
-                } else {
+                if (!this.win) {
                     this.restartGame();
                 }
             }
@@ -597,36 +595,6 @@ window.addEventListener('load', function(){
             } else {
                 this.bestEndlessTime = currentBest;
             }
-        }
-
-        continueGame(){
-            this.gameOver = false;
-            this.win = false;
-
-            this.enemies = [];
-            this.coins = [];
-
-            this.enemyTimer = 0;
-            this.coinTimer = 0;
-
-            // reset event state too
-            this.eventActive = false;
-            this.eventName = "";
-            this.eventTimer = 0;
-            this.eventEnemyTimer = 0;
-            this.eventCheckTimer = 0;
-
-            this.eventAnnouncement = "";
-            this.eventAnnouncementTimer = 0;
-
-            this.endlessScoreSaved = false;
-
-            this.difficultyMultiplier = 1;
-
-            this.powerUps = [];
-            this.powerUpTimer = 0;
-            this.powerUpMessage = "";
-            this.powerUpMessageTimer = 0;
         }
 
         restartGame(){

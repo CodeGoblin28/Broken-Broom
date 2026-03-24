@@ -73,7 +73,7 @@ export class UI {
         // Shield count
         if (this.game.isEndless){
             if (this.game.player.shield > 0) {
-                context.fillText("Shield: " + this.game.player.shield, 20, 220);
+                context.fillText("Shield: " + this.game.player.shield, 20, 190);
             }
         } else if(this.game.questItemImage){
             if (this.game.player.shield > 0) {

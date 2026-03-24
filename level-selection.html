@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Select World</title>
 
+<link rel="icon" type="image/png" sizes="32x32" href="asset/icons/TAB-32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="asset/icons/TAB-16.png">
+
 <style>
     body {
         margin: 0;
@@ -45,6 +48,24 @@
         width: 200px;
         display: block;
         transition: 0.2s ease;
+    }
+
+    .world-best-time {
+        position: absolute;
+        bottom: -34px;
+        left: 50%;
+        transform: translateX(-50%);
+        min-width: 120px;
+        padding: 6px 10px;
+        text-align: center;
+        font-size: 13px;
+        font-weight: bold;
+        color: white;
+        background: rgba(0,0,0,0.75);
+        border: 1px solid rgba(255,255,255,0.7);
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.25);
+        pointer-events: none;
     }
 
     .world:hover {
@@ -104,10 +125,10 @@
     .info-box {
         position: absolute;
         left: 50%;
-        bottom: 50px;
+        bottom: 28px;
         transform: translateX(-50%);
-        width: min(950px, 85vw);
-        min-height: 180px;
+        width: min(1100px, 90vw);
+        min-height: 200px;
         z-index: 3;
 
         padding: 20px 28px;
@@ -137,8 +158,19 @@
         margin-bottom: 18px;
     }
 
-    .difficulty-section {
-        margin-top: 10px;
+    .controls-row {
+        margin-top: 16px;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        gap: 24px;
+        flex-wrap: wrap;
+    }
+
+    .difficulty-section,
+    .endless-section {
+        flex: 1 1 380px;
+        max-width: 430px;
     }
 
     .difficulty-label {
@@ -150,8 +182,12 @@
     .difficulty-buttons {
         display: flex;
         justify-content: center;
-        gap: 12px;
+        gap: 10px;
         flex-wrap: wrap;
+    }
+
+    .endless-section {
+        display: none;
     }
 
     .difficulty-btn {
@@ -195,11 +231,6 @@
 
     .world.trophy-unlocked .trophy-overlay {
         display: block;
-    }
-
-    .endless-section {
-        margin-top: 18px;
-        display: none;
     }
 
     .endless-btn {
@@ -269,6 +300,24 @@
     .hint-icon:hover .hint-tooltip {
         display: block;
     }
+
+    @media (max-width: 900px) {
+        .controls-row {
+            gap: 16px;
+        }
+
+        .difficulty-section,
+        .endless-section {
+            flex: 1 1 100%;
+            max-width: 100%;
+        }
+
+        .info-box {
+            width: min(95vw, 1000px);
+            bottom: 20px;
+            padding: 18px 20px;
+        }
+    }
 </style>
 </head>
 
@@ -292,6 +341,7 @@
         </div>
         <img src="asset/worlds/Forest.png" alt="Forest">
         <div class="lock-overlay">🔒</div>
+        <div class="world-best-time">Best: --</div>
     </div>
 
     <div class="world" data-world="cave">
@@ -300,6 +350,7 @@
         </div>
         <img src="asset/worlds/Cave.png" alt="Cave">
         <div class="lock-overlay">🔒</div>
+        <div class="world-best-time">Best: --</div>
     </div>
 
     <div class="world" data-world="volcano">
@@ -308,6 +359,7 @@
         </div>
         <img src="asset/worlds/Volcano.png" alt="Volcano">
         <div class="lock-overlay">🔒</div>
+        <div class="world-best-time">Best: --</div>
     </div>
 
     <div class="world" data-world="sky">
@@ -316,6 +368,7 @@
         </div>
         <img src="asset/worlds/Sky.png" alt="Sky">
         <div class="lock-overlay">🔒</div>
+        <div class="world-best-time">Best: --</div>
     </div>
 </div>
 
@@ -325,18 +378,21 @@
         While flying over the forest, you were struck by a wild bird and sent tumbling through the trees. Your broom shattered on the way down, and now you must search the woods for a sturdy stick to repair it.
     </div>
 
-    <div class="difficulty-section">
-        <div class="difficulty-label">Select Difficulty</div>
-        <div class="difficulty-buttons">
-            <button class="difficulty-btn" data-difficulty="supereasy">Super Easy</button>
-            <button class="difficulty-btn" data-difficulty="easy">Easy</button>
-            <button class="difficulty-btn active" data-difficulty="normal">Normal</button>
-            <button class="difficulty-btn" data-difficulty="hard">Hard</button>
+    <div class="controls-row">
+        <div class="difficulty-section">
+            <div class="difficulty-label">Select Difficulty</div>
+            <div class="difficulty-buttons">
+                <button class="difficulty-btn" data-difficulty="supereasy">Super Easy</button>
+                <button class="difficulty-btn" data-difficulty="easy">Easy</button>
+                <button class="difficulty-btn active" data-difficulty="normal">Normal</button>
+                <button class="difficulty-btn" data-difficulty="hard">Hard</button>
+            </div>
         </div>
-    </div>
 
-    <div class="endless-section" id="endlessSection">
-        <button class="endless-btn" id="endlessBtn">Play Endless Mode</button>
+        <div class="endless-section" id="endlessSection">
+            <div class="difficulty-label">Endless Mode</div>
+            <button class="endless-btn" id="endlessBtn">Play Endless Mode</button>
+        </div>
     </div>
 </div>
 
@@ -368,6 +424,22 @@
     function startMenuMusic() {
         applyMenuMusicSettings();
         menuMusic.play().catch(() => {});
+    }
+
+    function updateWorldBestTimes() {
+        document.querySelectorAll(".world").forEach(world => {
+            const worldName = world.dataset.world;
+            const bestTime = Number(localStorage.getItem(`${worldName}EndlessBestTime`)) || 0;
+            const bestTimeLabel = world.querySelector(".world-best-time");
+
+            if (!bestTimeLabel) return;
+
+            if (bestTime > 0) {
+                bestTimeLabel.textContent = `Best: ${bestTime.toFixed(1)}s`;
+            } else {
+                bestTimeLabel.textContent = "Best: --";
+            }
+        });
     }
 
     window.addEventListener("load", startMenuMusic, { once: true });
@@ -420,9 +492,6 @@
     const highestUnlockedWorld = localStorage.getItem("highestUnlockedWorld");
     const highestIndex = worldOrder.indexOf(highestUnlockedWorld);
 
-    const endlessUnlocked = localStorage.getItem("endlessUnlocked") === "true";
-    const endlessBestTime = Number(localStorage.getItem("endlessBestTime")) || 0;
-
     document.querySelector('.back-button').addEventListener('click', () => {
         window.location.href = "index.html";
     });
@@ -460,6 +529,7 @@
 
     setWorldInfo(worldLore.forest.title, worldLore.forest.text);
     updateEndlessButton("forest", true);
+    updateWorldBestTimes();
 
     const worlds = document.querySelectorAll('.world');
 
