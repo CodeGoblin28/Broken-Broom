@@ -9,6 +9,7 @@ export class UI {
     }
 
     draw(context){
+        if (this.game.storyActive) return;
         context.save();
         context.shadowOffsetX = 2;
         context.shadowOffsetY = 2;
@@ -118,11 +119,46 @@ export class UI {
             }
             else if(this.game.questItemsCollected == this.game.questItemAmount){
                 context.fillText("Quest Items Has Been Collected!!!", this.game.width * .5 , this.game.height * .3 ); 
-                context.font = this.fontSize * 1 + 'px ' + this.fontFamily;    
-                if(this.game.world !== 'sky'){
-                    context.fillText("Press ESC to Return!!! Next World Has been Unlocked", this.game.width * .5 , this.game.height * .3 + 40 ); 
+                context.font = this.fontSize * 1 + 'px ' + this.fontFamily;
+
+                if (this.game.world !== 'sky') {
+                    if (this.difficulty === "normal" || this.difficulty === "hard") {
+                        context.font = this.fontSize * 1 + 'px ' + this.fontFamily;
+                        context.fillText("Next World Has been Unlocked!", this.game.width * .5 , this.game.height * .3 + 40 );
+                        context.fillText("Press ESC to Return!", this.game.width * .5 , this.game.height * .3 + 80 );
+
+                        context.font = this.fontSize * .5 + 'px ' + this.fontFamily;
+                        context.fillText("Endless Mode Unlocked!", this.game.width * .5 , this.game.height * .3 + 100 );
+
+
+                    } else {
+                        context.font = this.fontSize * 1 + 'px ' + this.fontFamily;
+                        context.fillText("Next World Has been Unlocked!", this.game.width * .5 , this.game.height * .3 + 40 );
+                        context.fillText("Press ESC to Return!", this.game.width * .5 , this.game.height * .3 + 80 );
+
+                        context.font = this.fontSize * .5 + 'px ' + this.fontFamily;
+                        context.fillText("Finish World on Normal or Hard to unlock Endless!", this.game.width * .5 , this.game.height * .3 + 100 );
+                    }
+
+
                 } else {
-                    context.fillText("Press ESC to Return!!! SOAR HIGH TO THE HORIZON!!!", this.game.width * .5 , this.game.height * .3 + 40 ); 
+                    if (this.difficulty === "normal" || this.difficulty === "hard") {
+                        context.font = this.fontSize * 1 + 'px ' + this.fontFamily;
+                        context.fillText("SOAR HIGH IN THE SKY!!!", this.game.width * .5 , this.game.height * .3 + 40 );
+                        context.fillText("Press ESC to Return!", this.game.width * .5 , this.game.height * .3 + 80 );
+
+                        context.font = this.fontSize * .5 + 'px ' + this.fontFamily;
+                        context.fillText("Endless Mode Unlocked!", this.game.width * .5 , this.game.height * .3 + 100 );
+
+
+                    } else {
+                        context.font = this.fontSize * 1 + 'px ' + this.fontFamily;
+                        context.fillText("SOAR HIGH IN THE SKY!!!", this.game.width * .5 , this.game.height * .3 + 40 );
+                        context.fillText("Press ESC to Return!", this.game.width * .5 , this.game.height * .3 + 80 );
+
+                        context.font = this.fontSize * .5 + 'px ' + this.fontFamily;
+                        context.fillText("Finish World on Normal or Hard to unlock Endless!", this.game.width * .5 , this.game.height * .3 + 100 );
+                    }
                 }
             } else {
                 context.fillText("Opps!!! You Died", this.game.width * .5 , this.game.height * .3 ); 

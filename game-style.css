@@ -30,3 +30,81 @@ html, body {
 #layerSky1, #layerSky2, #layerSky3, #layerSky4, #layerSky5 {
     display: none;
 }
+
+
+
+
+.story-overlay{
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.55);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    opacity: 1;
+    transition: opacity 0.35s ease;
+}
+
+.story-overlay.hidden{
+    opacity: 0;
+    pointer-events: none;
+}
+
+.story-panel{
+    width: min(900px, 88vw);
+    padding: 32px 36px;
+    border: 2px solid rgba(255,255,255,0.8);
+    border-radius: 16px;
+    background: rgba(0,0,0,0.35);
+    color: white;
+    text-align: center;
+    box-shadow: 0 0 25px rgba(0,0,0,0.45);
+    backdrop-filter: blur(2px);
+}
+
+.story-world-label{
+    font-size: 28px;
+    font-weight: bold;
+    letter-spacing: 2px;
+    margin-bottom: 18px;
+}
+
+.story-text{
+    min-height: 180px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 12px;
+    font-size: 28px;
+    line-height: 1.6;
+}
+
+.story-line{
+    opacity: 0;
+    transform: translateY(10px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+}
+
+.story-line.visible{
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.story-skip-btn{
+    margin-top: 18px;
+    padding: 12px 26px;
+    font-size: 16px;
+    font-weight: bold;
+    color: white;
+    background: rgba(255,255,255,0.08);
+    border: 2px solid white;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.2s ease;
+}
+
+.story-skip-btn:hover{
+    background: white;
+    color: black;
+}

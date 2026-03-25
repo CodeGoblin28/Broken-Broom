@@ -191,7 +191,7 @@ export class FallingBranch extends Enemy {
 
         this.image = document.getElementById('branch');
         this.speedX = 0;
-        this.speedY = 3;    
+        this.speedY = 5;    
         this.maxFrame = 0;
 
         // Warning phase

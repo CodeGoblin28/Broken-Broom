@@ -7,6 +7,7 @@ import { UI } from "./UI.js";
 import { Stick, Web, Ruby, Scale } from "./questItems.js";
 import { PowerUp } from "./powerUp.js";
 import { AudioManager } from './audio.js';
+import { StoryIntro } from "./storyIntro.js";
 
 // import { Boss } from "./boss.js";
 
@@ -81,6 +82,15 @@ window.addEventListener('load', function(){
             } else {
                 this.background = new BackgroundForest(this);
             }
+
+            // =========================
+            // Story Scene
+            // =========================
+
+            this.storyActive = false;
+            this.storyEndingActive = false;
+            this.storyShown = false;
+            this.storyIntro = new StoryIntro(this);
 
             // =========================
             // MUSIC
@@ -205,6 +215,17 @@ window.addEventListener('load', function(){
                 window.location.href = "level-selection.html";
             }
 
+            if (this.storyActive) {
+                this.applyMusicSettings();
+
+                if (this.input.keys.includes("Escape")) {
+                    this.stopMusic();
+                    window.location.href = "level-selection.html";
+                }
+
+                return;
+            }
+
             if (this.input.keys.includes(' ') && this.gameOver && !this.restartPressed) {
                 this.restartPressed = true;
 
@@ -232,8 +253,27 @@ window.addEventListener('load', function(){
                 this.gameOver = true;
                 this.win = true;
                 this.unlockNextWorld();
+
+                if (this.world === "sky" && !this.storyShown) {
+                    this.storyShown = true;
+                    this.storyIntro.playSkyEnding();
+                }
             }
 
+            // =========================
+            // Story Scene
+            // =========================  
+
+            if (this.storyActive) {
+                this.applyMusicSettings();
+
+                if (this.input.keys.includes("Escape")) {
+                    this.stopMusic();
+                    window.location.href = "level-selection.html";
+                }
+
+                return;
+            }
 
             // =========================
             // Speed Difficulty
@@ -576,8 +616,8 @@ window.addEventListener('load', function(){
                 localStorage.setItem("highestUnlockedWorld", nextWorld);
             }
 
-            // Unlock endless + trophy for the world you completed
-            if (!this.isEndless) {
+            // Unlock endless + trophy ONLY if completed on normal difficulty
+            if (!this.isEndless && (this.difficulty === "normal" || this.difficulty === "hard")) {
                 localStorage.setItem(`${this.world}EndlessUnlocked`, "true");
                 localStorage.setItem(`${this.world}TrophyUnlocked`, "true");
             }
@@ -690,6 +730,8 @@ window.addEventListener('load', function(){
 
     const game = new Game(canvas.width, canvas.height, selectedWorld);
     console.log(game);
+
+    game.storyIntro.playWorldIntro();
 
     let lastTime = 0;
 
