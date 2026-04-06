@@ -24,9 +24,9 @@ export class Idle extends State{
         this.player.maxFrame = 9;
     }
     handleInput(input){
-        if (input.includes('ArrowLeft') || input.includes('ArrowRight') || input.includes('a') || input.includes('d')){
+        if (input.includes('ArrowLeft') || input.includes('ArrowRight') || input.includes('a') || input.includes('d')|| input.includes('A') || input.includes('D')){
             this.player.setState(states.RUNNING);
-        } else if (input.includes('ArrowUp') || input.includes('w')){
+        } else if (input.includes('ArrowUp') || input.includes('w') || input.includes('W')){
             if (this.player.game.world === "cave" || this.player.game.world === "volcano"){
                 this.player.setState(states.TAKEOFF);
             } else {
@@ -47,7 +47,7 @@ export class Running extends State{
         this.player.maxFrame = 9;
     }
     handleInput(input){
-        if (input.includes('ArrowUp') || input.includes('w')){
+        if (input.includes('ArrowUp') || input.includes('w') || input.includes('W')){
             if (this.player.game.world === "cave" || this.player.game.world === "volcano"){
                 this.player.setState(states.TAKEOFF);
             } else {
@@ -91,7 +91,7 @@ export class Falling extends State{
             this.player.game.audio.play('landing');
             this.player.setState(states.RUNNING);
         }
-        if (input.includes('ArrowDown') || input.includes('s')) {
+        if (input.includes('ArrowDown') || input.includes('s') || input.includes('S')) {
             this.player.vy = 1000;
         } 
     }
@@ -109,25 +109,29 @@ export class Flying extends State{
     }
     handleInput(input){
         const isSky = this.player.game.world === "sky";
+        const isCave = this.player.game.world === "cave";
 
         if (this.player.onGround() && !isSky){
             this.player.setState(states.RUNNING);
+            return;
         }
 
-        // const flySpeed = 500 * this.player.game.difficultyMultiplier;
+        // Cave: once timer is used up, force falling
+        if (isCave && this.player.caveFlightExpired) {
+            this.player.setState(states.FALLING);
+            return;
+        }
 
-        // Optional: allow vertical control
-        if (input.includes('ArrowUp') || input.includes('w')) {
+        if (input.includes('ArrowUp') || input.includes('w') || input.includes('W')) {
             this.player.vy = -500; 
         } 
-        else if (input.includes('ArrowDown') || input.includes('s')) {
-            this.player.vy = 500;  // down
+        else if (input.includes('ArrowDown') || input.includes('s') || input.includes('S')) {
+            this.player.vy = 500;
         } 
         else {
             if (isSky) {
-                // float in sky
                 this.player.vy = 0;
-            }    
+            }
         }
     }
 }
@@ -151,7 +155,7 @@ export class TakeOff extends State{
             this.player.setState(states.FLYING);
         }
 
-        if (input.includes('ArrowUp') || input.includes('w')) {
+        if (input.includes('ArrowUp') || input.includes('w') || input.includes('W')) {
             this.player.vy = -500;
         } 
     }

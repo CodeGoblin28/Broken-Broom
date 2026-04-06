@@ -19,7 +19,7 @@ export class StoryIntro {
                 "A replacement stick might do."
             ],
             cave: [
-                "The stick holds… but barely.",
+                "The stick holds… but barely able for short flights.",
                 "Deep within the cave, webs stronger than steel await.",
                 "If you can collect them…",
                 "Your broom might survive the journey ahead."

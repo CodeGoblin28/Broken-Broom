@@ -13,10 +13,14 @@ export class InputHandler {
                     e.key === 's' ||
                     e.key === 'd' ||
                     e.key === 'w'||
+                    e.key === 'A' ||
+                    e.key === 'S' ||
+                    e.key === 'D' ||
+                    e.key === 'W'||
                     e.key === ' '
                 ) && this.keys.indexOf(e.key) === -1){
                 this.keys.push(e.key);
-            } else if (e.key === 'h') {
+            } else if (e.key === 'h' || e.key === 'H') {
                 this.game.debug = !this.game.debug;
             } 
 
@@ -33,6 +37,10 @@ export class InputHandler {
                 e.key === 's' ||
                 e.key === 'd' ||
                 e.key === 'w'||
+                e.key === 'A' ||
+                e.key === 'S' ||
+                e.key === 'D' ||
+                e.key === 'W'||
                 e.key === ' '){
                 this.keys.splice(this.keys.indexOf(e.key), 1);
             }

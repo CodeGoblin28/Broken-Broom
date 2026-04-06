@@ -729,7 +729,7 @@ export class FireBall extends Enemy {
         // Spawn above player
         // this.x = this.game.player.x + this.game.player.width / 2 - this.width / 2;
         //Math.random() * this.game.height * 0.5
-        this.x = Math.random() * this.game.width + 100;
+        this.x = Math.random() * (this.game.width - this.width);
         this.y = 0 - this.height;
 
         this.image = document.getElementById('fire_ball');

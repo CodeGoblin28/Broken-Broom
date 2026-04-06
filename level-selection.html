@@ -161,16 +161,19 @@
     .controls-row {
         margin-top: 16px;
         display: flex;
-        justify-content: center;
+        justify-content: space-between;
         align-items: flex-start;
         gap: 24px;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
     }
 
     .difficulty-section,
     .endless-section {
-        flex: 1 1 380px;
-        max-width: 430px;
+        flex: 1 1 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
     }
 
     .difficulty-label {
@@ -186,8 +189,10 @@
         flex-wrap: wrap;
     }
 
-    .endless-section {
-        display: none;
+    .difficulty-btn-wrap,
+    .endless-btn-wrap {
+        position: relative;
+        display: inline-block;
     }
 
     .difficulty-btn {
@@ -213,23 +218,82 @@
         border-color: gold;
         font-weight: bold;
     }
-    .trophy-overlay {
-    position: absolute;
-    top: -22px;
-    left: 50%;
-    transform: translateX(-50%);
-    display: none;
-    z-index: 4;
-    pointer-events: none;
+
+    .button-tooltip {
+        position: absolute;
+        left: 50%;
+        bottom: calc(100% + 10px);
+        transform: translateX(-50%);
+        min-width: 220px;
+        max-width: 260px;
+        padding: 10px 12px;
+        font-size: 13px;
+        line-height: 1.5;
+        color: white;
+        background: rgba(0,0,0,0.9);
+        border: 1px solid rgba(255,255,255,0.2);
+        border-radius: 8px;
+        box-shadow: 0 8px 18px rgba(0,0,0,0.35);
+        display: none;
+        pointer-events: none;
+        z-index: 20;
+        white-space: normal;
     }
 
-    .trophy-overlay img {
-        width: 56px;
-        height: 56px;
-        filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.9));
+    .button-tooltip::after {
+        content: "";
+        position: absolute;
+        top: 100%;
+        left: 50%;
+        transform: translateX(-50%);
+        border-width: 6px;
+        border-style: solid;
+        border-color: rgba(0,0,0,0.9) transparent transparent transparent;
     }
 
-    .world.trophy-unlocked .trophy-overlay {
+    .difficulty-btn-wrap:hover .button-tooltip,
+    .endless-btn-wrap:hover .button-tooltip {
+        display: block;
+    }
+    
+    .trophy-row {
+        position: absolute;
+        top: -26px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 6px;
+        z-index: 4;
+        pointer-events: none;
+    }
+
+    .trophy-badge {
+        position: relative;
+        width: 42px;
+        height: 42px;
+        display: none;
+    }
+
+    .trophy-badge img {
+        width: 100%;
+        height: 100%;
+        display: block;
+        filter: drop-shadow(0 0 8px rgba(255, 215, 0, 0.85));
+    }
+
+    .trophy-badge span {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: bold;
+        color: black;
+        text-shadow: none;
+    }
+
+    .trophy-badge.show {
         display: block;
     }
 
@@ -245,10 +309,20 @@
         font-weight: bold;
     }
 
-    .endless-btn:hover {
+    .endless-btn:hover:not(:disabled) {
         background: gold;
         color: black;
         transform: translateY(-2px);
+    }
+
+    .endless-btn:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+        border-color: rgba(255, 215, 0, 0.45);
+        background: rgba(255, 215, 0, 0.08);
+        color: rgba(255,255,255,0.75);
+        transform: none;
+        box-shadow: none;
     }
 
     .top-left-ui {
@@ -257,59 +331,43 @@
         left: 20px;
         display: flex;
         align-items: center;
-        gap: 10px;
         z-index: 10;
     }
 
-    /* Hint Icon */
-    .hint-icon {
-        width: 28px;
-        height: 28px;
-        border-radius: 50%;
-        background: rgba(255,255,255,0.15);
-        color: white;
-        font-weight: bold;
-        text-align: center;
-        line-height: 28px;
-        cursor: pointer;
-        position: relative;
-        transition: 0.2s ease;
-    }
-
-    .hint-icon:hover {
-        background: gold;
-        color: black;
-    }
-
-    /* Tooltip */
-    .hint-tooltip {
-        position: absolute;
-        top: 120%;
-        left: 0;
-        width: 260px;
-        padding: 10px;
-        font-size: 13px;
-        background: rgba(0,0,0,0.85);
-        color: white;
-        border-radius: 8px;
-        display: none;
+    .screen-transition {
+        position: fixed;
+        inset: 0;
+        background: black;
+        z-index: 9999;
         pointer-events: none;
+        opacity: 1;
+        transition: opacity 0.45s ease;
     }
 
-    /* Show on hover */
-    .hint-icon:hover .hint-tooltip {
-        display: block;
+    .screen-transition.hidden {
+        opacity: 0;
+    }
+
+    .screen-transition.active {
+        opacity: 1;
+        pointer-events: all;
     }
 
     @media (max-width: 900px) {
         .controls-row {
             gap: 16px;
+            flex-wrap: wrap;
         }
 
         .difficulty-section,
         .endless-section {
             flex: 1 1 100%;
             max-width: 100%;
+            text-align: center;
+        }
+
+        .difficulty-buttons {
+            justify-content: center;
         }
 
         .info-box {
@@ -323,21 +381,18 @@
 
 <body>
 
+<div id="screenTransition" class="screen-transition"></div>
+
 <div class="top-left-ui">
     <button class="back-button">← Back</button>
-
-    <div class="hint-icon">
-        ?
-        <div class="hint-tooltip">
-            To unlock endless, you must complete the world in normal or hard difficulty.
-        </div>
-    </div>
 </div>
 
 <div class="worlds">
     <div class="world" data-world="forest">
-        <div class="trophy-overlay">
-            <img src="asset/icons/trophy.png" alt="Trophy">
+        <div class="trophy-row">
+            <div class="trophy-badge easy"><img src="asset/icons/trophy.png" alt="Easy Trophy"><span>E</span></div>
+            <div class="trophy-badge normal"><img src="asset/icons/trophy.png" alt="Normal Trophy"><span>N</span></div>
+            <div class="trophy-badge hard"><img src="asset/icons/trophy.png" alt="Hard Trophy"><span>H</span></div>
         </div>
         <img src="asset/worlds/Forest.png" alt="Forest">
         <div class="lock-overlay">🔒</div>
@@ -345,8 +400,10 @@
     </div>
 
     <div class="world" data-world="cave">
-        <div class="trophy-overlay">
-            <img src="asset/icons/trophy.png" alt="Trophy">
+        <div class="trophy-row">
+            <div class="trophy-badge easy"><img src="asset/icons/trophy.png" alt="Easy Trophy"><span>E</span></div>
+            <div class="trophy-badge normal"><img src="asset/icons/trophy.png" alt="Normal Trophy"><span>N</span></div>
+            <div class="trophy-badge hard"><img src="asset/icons/trophy.png" alt="Hard Trophy"><span>H</span></div>
         </div>
         <img src="asset/worlds/Cave.png" alt="Cave">
         <div class="lock-overlay">🔒</div>
@@ -354,8 +411,10 @@
     </div>
 
     <div class="world" data-world="volcano">
-        <div class="trophy-overlay">
-            <img src="asset/icons/trophy.png" alt="Trophy">
+        <div class="trophy-row">
+            <div class="trophy-badge easy"><img src="asset/icons/trophy.png" alt="Easy Trophy"><span>E</span></div>
+            <div class="trophy-badge normal"><img src="asset/icons/trophy.png" alt="Normal Trophy"><span>N</span></div>
+            <div class="trophy-badge hard"><img src="asset/icons/trophy.png" alt="Hard Trophy"><span>H</span></div>
         </div>
         <img src="asset/worlds/Volcano.png" alt="Volcano">
         <div class="lock-overlay">🔒</div>
@@ -363,8 +422,10 @@
     </div>
 
     <div class="world" data-world="sky">
-        <div class="trophy-overlay">
-            <img src="asset/icons/trophy.png" alt="Trophy">
+        <div class="trophy-row">
+            <div class="trophy-badge easy"><img src="asset/icons/trophy.png" alt="Easy Trophy"><span>E</span></div>
+            <div class="trophy-badge normal"><img src="asset/icons/trophy.png" alt="Normal Trophy"><span>N</span></div>
+            <div class="trophy-badge hard"><img src="asset/icons/trophy.png" alt="Hard Trophy"><span>H</span></div>
         </div>
         <img src="asset/worlds/Sky.png" alt="Sky">
         <div class="lock-overlay">🔒</div>
@@ -382,16 +443,53 @@
         <div class="difficulty-section">
             <div class="difficulty-label">Select Difficulty</div>
             <div class="difficulty-buttons">
-                <button class="difficulty-btn" data-difficulty="supereasy">Super Easy</button>
-                <button class="difficulty-btn" data-difficulty="easy">Easy</button>
-                <button class="difficulty-btn active" data-difficulty="normal">Normal</button>
-                <button class="difficulty-btn" data-difficulty="hard">Hard</button>
+                <div class="difficulty-btn-wrap">
+                    <button class="difficulty-btn" data-difficulty="supereasy">Super Easy</button>
+                    <div class="button-tooltip">
+                        - +1 Life<br>
+                        - Slower Enemy Spawn<br>
+                        - Lower Difficulty Increase Rate<br>
+                        - Increased Power Up Spawn<br>
+                        - +2s Cave Flight Time
+                    </div>
+                </div>
+
+                <div class="difficulty-btn-wrap">
+                    <button class="difficulty-btn" data-difficulty="easy">Easy</button>
+                    <div class="button-tooltip">
+                        - Slower Enemy Spawn<br>
+                        - Lower Difficulty Increase Rate
+                    </div>
+                </div>
+
+                <div class="difficulty-btn-wrap">
+                    <button class="difficulty-btn active" data-difficulty="normal">Normal</button>
+                    <div class="button-tooltip">
+                        - No Modifications
+                    </div>
+                </div>
+
+                <div class="difficulty-btn-wrap">
+                    <button class="difficulty-btn" data-difficulty="hard">Hard</button>
+                    <div class="button-tooltip">
+                        - -2 Life<br>
+                        - Faster Enemy Spawn<br>
+                        - Higher Difficulty Increase Rate<br>
+                        - Decreased Power Up Spawn<br>
+                        - -2s Cave Flight Time
+                    </div>
+                </div>
             </div>
         </div>
 
         <div class="endless-section" id="endlessSection">
             <div class="difficulty-label">Endless Mode</div>
-            <button class="endless-btn" id="endlessBtn">Play Endless Mode</button>
+            <div class="endless-btn-wrap">
+                <button class="endless-btn" id="endlessBtn" disabled>Play Endless Mode</button>
+                <div class="button-tooltip" id="endlessLockedTooltip">
+                    Complete the world in normal or hard difficulty.
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -402,10 +500,29 @@
 
 <script>
     const body = document.body;
+
+    const screenTransition = document.getElementById("screenTransition");
+
+    function fadeInPage() {
+        requestAnimationFrame(() => {
+            screenTransition.classList.add("hidden");
+        });
+    }
+
+    function transitionTo(url) {
+        screenTransition.classList.remove("hidden");
+        screenTransition.classList.add("active");
+
+        setTimeout(() => {
+            window.location.href = url;
+        }, 450);
+    }
+
     const worldTitle = document.getElementById("worldTitle");
     const worldInfo = document.getElementById("worldInfo");
     const endlessSection = document.getElementById("endlessSection");
     const endlessBtn = document.getElementById("endlessBtn");
+    const endlessLockedTooltip = document.getElementById("endlessLockedTooltip");
 
     const menuMusic = document.getElementById("menuMusic");
 
@@ -442,7 +559,10 @@
         });
     }
 
-    window.addEventListener("load", startMenuMusic, { once: true });
+    window.addEventListener("load", () => {
+        startMenuMusic();
+        fadeInPage();
+    }, { once: true });
     window.addEventListener("click", startMenuMusic, { once: true });
     window.addEventListener("keydown", startMenuMusic, { once: true });
 
@@ -493,7 +613,7 @@
     const highestIndex = worldOrder.indexOf(highestUnlockedWorld);
 
     document.querySelector('.back-button').addEventListener('click', () => {
-        window.location.href = "index.html";
+        transitionTo("index.html");
     });
 
     function setWorldInfo(title, text) {
@@ -502,15 +622,26 @@
     }
 
     function updateEndlessButton(worldName, isUnlocked) {
-        const trophyUnlocked = localStorage.getItem(`${worldName}TrophyUnlocked`) === "true";
-        const endlessUnlocked = localStorage.getItem(`${worldName}EndlessUnlocked`) === "true";
+        const normalUnlocked =
+            localStorage.getItem(`${worldName}TrophyNormalUnlocked`) === "true" ||
+            localStorage.getItem(`${worldName}TrophyUnlocked`) === "true";
+
+        const hardUnlocked =
+            localStorage.getItem(`${worldName}TrophyHardUnlocked`) === "true";
+
+        const endlessUnlocked =
+            localStorage.getItem(`${worldName}EndlessUnlocked`) === "true" ||
+            normalUnlocked ||
+            hardUnlocked;
+
         const endlessBestTime = Number(localStorage.getItem(`${worldName}EndlessBestTime`)) || 0;
+        const label = worldName.charAt(0).toUpperCase() + worldName.slice(1);
 
-        // show endless if either trophy OR endless unlock exists
-        if (isUnlocked && (trophyUnlocked || endlessUnlocked)) {
-            endlessSection.style.display = "block";
+        endlessSection.style.display = "block";
 
-            const label = worldName.charAt(0).toUpperCase() + worldName.slice(1);
+        if (isUnlocked && endlessUnlocked) {
+            endlessBtn.disabled = false;
+            endlessLockedTooltip.style.display = "none";
 
             if (endlessBestTime > 0) {
                 endlessBtn.textContent = `Play ${label} Endless (Best: ${endlessBestTime.toFixed(1)}s)`;
@@ -518,7 +649,9 @@
                 endlessBtn.textContent = `Play ${label} Endless`;
             }
         } else {
-            endlessSection.style.display = "none";
+            endlessBtn.disabled = true;
+            endlessBtn.textContent = `Play ${label} Endless (Locked)`;
+            endlessLockedTooltip.style.display = "";
         }
     }
 
@@ -542,10 +675,23 @@
             world.classList.add("locked");
         }
 
-        const trophyUnlocked = localStorage.getItem(`${selectedWorld}TrophyUnlocked`) === "true";
-        if (trophyUnlocked) {
-            world.classList.add("trophy-unlocked");
-        }
+        const easyUnlocked =
+            localStorage.getItem(`${selectedWorld}TrophyEasyUnlocked`) === "true";
+
+        const normalUnlocked =
+            localStorage.getItem(`${selectedWorld}TrophyNormalUnlocked`) === "true" ||
+            localStorage.getItem(`${selectedWorld}TrophyUnlocked`) === "true";
+
+        const hardUnlocked =
+            localStorage.getItem(`${selectedWorld}TrophyHardUnlocked`) === "true";
+
+        const easyBadge = world.querySelector(".trophy-badge.easy");
+        const normalBadge = world.querySelector(".trophy-badge.normal");
+        const hardBadge = world.querySelector(".trophy-badge.hard");
+
+        if (easyUnlocked && easyBadge) easyBadge.classList.add("show");
+        if (normalUnlocked && normalBadge) normalBadge.classList.add("show");
+        if (hardUnlocked && hardBadge) hardBadge.classList.add("show");
 
         world.addEventListener('mouseenter', () => {
             hoveredWorld = selectedWorld;
@@ -580,16 +726,15 @@
                 return;
             }
 
-            window.location.href = `game.html?world=${selectedWorld}&difficulty=${selectedDifficulty}`;
+            transitionTo(`game.html?world=${selectedWorld}&difficulty=${selectedDifficulty}`);
         });
     });
 
     endlessBtn.addEventListener("click", () => {
-        window.location.href = `game.html?world=${hoveredWorld}&difficulty=${selectedDifficulty}&mode=endless`;
+        if (endlessBtn.disabled) return;
+        transitionTo(`game.html?world=${hoveredWorld}&difficulty=${selectedDifficulty}&mode=endless`);
     });
 </script>
-
-
 
 </body>
 </html>

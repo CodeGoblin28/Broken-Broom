@@ -27,7 +27,7 @@ window.addEventListener('load', function(){
         supereasy: 5,
         easy: 10,
         normal: 15,
-        hard: 20
+        hard: 15
     };
 
     const difficultyLabels = {
@@ -54,6 +54,15 @@ window.addEventListener('load', function(){
             this.difficultyMultiplier = 1;
             this.difficultyIncreaseRate = 0.00001; // tweak this
             this.maxDifficultyMultiplier = 3;
+
+            if (this.difficulty === "normal") {
+                this.difficultyIncreaseRate = 0.000015;
+                this.maxDifficultyMultiplier = 3;
+            }
+            else if (this.difficulty === "hard") {
+                this.difficultyIncreaseRate = 0.000025;
+                this.maxDifficultyMultiplier = 4; // faster cap
+            }
 
 
             this.playerStillTimer = 0;
@@ -115,10 +124,20 @@ window.addEventListener('load', function(){
             this.coinTimer = 0;
             this.coinInterval = 3000;
 
+            // Power Ups
             this.powerUps = [];
             this.powerUpTimer = 0;
             this.powerUpInterval = 10000; // check every 10 sec
             this.powerUpChance = 0.20;   // 20% chance to spawn
+
+            if (this.difficulty === "supereasy") {
+                this.powerUpChance = 0.30;
+            } else if (this.difficulty === "normal") {
+                this.powerUpChance = 0.20;
+            }
+            else if (this.difficulty === "hard") {
+                this.powerUpChance = 0.10; // fewer lifesavers
+            }
 
             this.powerUpMessage = "";
             this.powerUpMessageTimer = 0;
@@ -152,7 +171,16 @@ window.addEventListener('load', function(){
             // =========================
             // APPLY SHOP UPGRADES
             // =========================
-            this.lives = 5;
+            this.lives = 5; 
+
+            if (this.difficulty === "supereasy") {
+                this.lives = 6;
+            } else if (this.difficulty === "normal") {
+                this.lives = 5;
+            }
+            else if (this.difficulty === "hard") {
+                this.lives = 3;
+            }
 
             // Health Up
             const hasHealthUp = localStorage.getItem("healthUp") === "owned";
@@ -171,6 +199,13 @@ window.addEventListener('load', function(){
             this.enemies = [];
             this.enemyTimer = 0;
             this.enemyInterval = 1500;
+
+            if (this.difficulty === "normal") {
+                this.enemyInterval = 1400;
+            }
+            else if (this.difficulty === "hard") {
+                this.enemyInterval = 1300; // MUCH faster spawning
+            }
 
             this.collisions = [];
             this.debug = false;
@@ -203,7 +238,10 @@ window.addEventListener('load', function(){
             this.eventAnnouncementTimer = 0;
             this.eventAnnouncementDuration = 4000;
 
+            this.transitionOverlay = document.getElementById("screenTransition");
+            this.isTransitioning = false;
 
+            this.fadeInPage();
 
         }
 
@@ -212,7 +250,7 @@ window.addEventListener('load', function(){
 
             if (this.input.keys.includes("Escape") && (game.gameOver || !this.gameStarted)) {
                 this.stopMusic();
-                window.location.href = "level-selection.html";
+                this.transitionTo("level-selection.html");
             }
 
             if (this.storyActive) {
@@ -232,6 +270,16 @@ window.addEventListener('load', function(){
                 if (!this.win) {
                     this.restartGame();
                 }
+            }
+
+            if (
+                this.input.keys.includes("Enter") &&
+                this.gameOver &&
+                this.win &&
+                !this.isEndless &&
+                this.world !== "sky"
+            ) {
+                this.goToNextWorld();
             }
 
             if (!this.input.keys.includes(' ')){
@@ -476,6 +524,25 @@ window.addEventListener('load', function(){
             }
         }
 
+        getNextWorld() {
+            const progression = {
+                forest: "cave",
+                cave: "volcano",
+                volcano: "sky",
+                sky: null
+            };
+
+            return progression[this.world] || null;
+        }
+
+        goToNextWorld() {
+            const nextWorld = this.getNextWorld();
+            if (!nextWorld) return;
+
+            this.stopMusic();
+            this.transitionTo(`game.html?world=${nextWorld}&difficulty=${this.difficulty}`);
+        }
+
         addQuest(){
             this.questItemsCollected++;
         }
@@ -510,6 +577,29 @@ window.addEventListener('load', function(){
             this.enemyTimer = 0; // so normal spawn resumes cleanly
 
             console.log("Event ended");
+        }
+
+        fadeInPage() {
+            if (!this.transitionOverlay) return;
+
+            requestAnimationFrame(() => {
+                this.transitionOverlay.classList.add("hidden");
+            });
+        }
+
+        transitionTo(url) {
+            if (!this.transitionOverlay || this.isTransitioning) {
+                window.location.href = url;
+                return;
+            }
+
+            this.isTransitioning = true;
+            this.transitionOverlay.classList.remove("hidden");
+            this.transitionOverlay.classList.add("active");
+
+            setTimeout(() => {
+                window.location.href = url;
+            }, 450);
         }
 
         addEventEnemy(){
@@ -594,6 +684,11 @@ window.addEventListener('load', function(){
                 if (Math.random() < 0.1) this.enemies.push(new Tornado(this));
             }
 
+            // HARD MODE: chance to spawn extra enemy
+            // if (this.difficulty === "hard" && Math.random() < 0.25) {
+            //     this.addEnemy(); // recursive extra spawn
+            // }
+
             console.log(this.enemies);
         }
 
@@ -616,9 +711,34 @@ window.addEventListener('load', function(){
                 localStorage.setItem("highestUnlockedWorld", nextWorld);
             }
 
-            // Unlock endless + trophy ONLY if completed on normal difficulty
-            if (!this.isEndless && (this.difficulty === "normal" || this.difficulty === "hard")) {
+            if (this.isEndless) return;
+
+            const easyKey = `${this.world}TrophyEasyUnlocked`;
+            const normalKey = `${this.world}TrophyNormalUnlocked`;
+            const hardKey = `${this.world}TrophyHardUnlocked`;
+
+            // Trophy unlock rules
+            if (this.difficulty === "easy") {
+                localStorage.setItem(easyKey, "true");
+            } 
+            else if (this.difficulty === "normal") {
+                localStorage.setItem(easyKey, "true");
+                localStorage.setItem(normalKey, "true");
                 localStorage.setItem(`${this.world}EndlessUnlocked`, "true");
+            } 
+            else if (this.difficulty === "hard") {
+                localStorage.setItem(easyKey, "true");
+                localStorage.setItem(normalKey, "true");
+                localStorage.setItem(hardKey, "true");
+                localStorage.setItem(`${this.world}EndlessUnlocked`, "true");
+            }
+
+            // optional legacy key so old checks don't break
+            if (
+                localStorage.getItem(easyKey) === "true" ||
+                localStorage.getItem(normalKey) === "true" ||
+                localStorage.getItem(hardKey) === "true"
+            ) {
                 localStorage.setItem(`${this.world}TrophyUnlocked`, "true");
             }
         }
@@ -643,10 +763,19 @@ window.addEventListener('load', function(){
 
             this.startWithShield = localStorage.getItem("upgrade_shield") === "owned";
 
-            this.lives = 5;
             if (localStorage.getItem("healthUp") === "owned") {
                 this.lives += 1;
             }
+
+            if (this.difficulty === "supereasy") {
+                this.lives = 6;
+            } else if (this.difficulty === "normal" || this.difficulty === "easy") {
+                this.lives = 5;
+            }
+            else if (this.difficulty === "hard") {
+                this.lives = 3;
+            }
+
 
             this.player = new Player(this);
 

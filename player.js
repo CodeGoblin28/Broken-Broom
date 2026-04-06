@@ -90,6 +90,17 @@ export class Player{
 
         this.stepTimer = 0;
         this.stepInterval = 500;
+
+        if (this.game.difficulty === "hard") {
+            this.caveFlightDuration = 3000;
+        } else if (this.game.difficulty === "supereasy") {
+            this.caveFlightDuration = 7000;
+        } else {
+            this.caveFlightDuration = 5000; // 5 seconds
+        }
+
+        this.caveFlightTimer = this.caveFlightDuration;
+        this.caveFlightExpired = false;
     }
     update(input, deltaTime){
         if (this.dead) return;
@@ -133,11 +144,38 @@ export class Player{
 
         this.currentState.handleInput(input);
 
+        // Cave flight timer
+        if (this.game.world === "cave") {
+            const isFlyingState =
+                this.currentState.state === "FLYING" ||
+                this.currentState.state === "TAKEOFF";
+
+            if (isFlyingState && !this.caveFlightExpired) {
+                this.caveFlightTimer -= deltaTime;
+
+                if (this.caveFlightTimer <= 0) {
+                    this.caveFlightTimer = 0;
+                    this.caveFlightExpired = true;
+
+                    // immediately start falling
+                    if (this.currentState.state !== "FALLING") {
+                        this.setState(3); // FALLING
+                    }
+                }
+            }
+
+            // reset timer once player lands
+            if (this.onGround()) {
+                this.caveFlightTimer = this.caveFlightDuration;
+                this.caveFlightExpired = false;
+            }
+        }
+
         const dt = deltaTime * 0.001;
 
         // Horizontal Movement
-        if(input.includes('ArrowRight') || input.includes('d')) this.speed = this.maxSpeed;
-        else if(input.includes('ArrowLeft') || input.includes('a')) this.speed = -this.maxSpeed;
+        if(input.includes('ArrowRight') || input.includes('d') || input.includes('D')) this.speed = this.maxSpeed;
+        else if(input.includes('ArrowLeft') || input.includes('a') || input.includes('A') ) this.speed = -this.maxSpeed;
         else this.speed = 0;
 
         this.x += this.speed * dt;
